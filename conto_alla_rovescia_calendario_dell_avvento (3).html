@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attese &amp; Stagioni — Conto alla Rovescia &amp; Calendario dell'Avvento</title>
+
+  <!-- Google Fonts: Cormorant Garamond (editoriale di lusso) + Plus Jakarta Sans (moderno e pulito) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --home-bg: #F5F2EC;
+      --home-surface: #FFFFFF;
+      --home-border: #E5DED2;
+      --home-text: #1E1D1B;
+      --home-muted: #66615A;
+      --home-accent: #9A7B4F;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-color: var(--home-bg);
+      color: var(--home-text);
+      transition: background-color 0.7s ease, color 0.5s ease;
+    }
+
+    .font-editorial {
+      font-family: var(--font-serif);
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       TRANSIZIONI VISTA HOME <-> VISTA EVENTO
+       ============================================================ */
+    .view-section {
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-enter {
+      animation: fadeSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Card della Home Neutrale */
+    .home-card {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--home-border);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease, border-color 0.35s ease;
+    }
+
+    .home-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(154, 123, 79, 0.55);
+      box-shadow: 0 24px 48px -18px rgba(30, 29, 27, 0.14);
+    }
+
+    .home-card img {
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .home-card:hover img {
+      transform: scale(1.07);
+    }
+
+    /* ============================================================
+       SFONDO FOTOGRAFICO CINEMATOGRAFICO (KEN BURNS)
+       ============================================================ */
+    @keyframes kenBurns {
+      0% { transform: scale(1.0) translate3d(0, 0, 0); }
+      50% { transform: scale(1.09) translate3d(-1.2%, -1%, 0); }
+      100% { transform: scale(1.0) translate3d(0, 0, 0); }
+    }
+
+    .ken-burns-img {
+      animation: kenBurns 32s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    /* Effetto vetro satinato realistico nella vista evento */
+    .glass-dark {
+      background: rgba(15, 17, 20, 0.42);
+      backdrop-filter: blur(22px) saturate(135%);
+      -webkit-backdrop-filter: blur(22px) saturate(135%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    /* Animazione al cambio dei secondi */
+    @keyframes tickPulse {
+      0% { transform: translateY(-3px) scale(1.04); opacity: 0.72; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .tick-animate {
+      animation: tickPulse 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Scintillio oro lucido per il 25 Dicembre */
+    @keyframes goldShimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .gold-shimmer-text {
+      background: linear-gradient(
+        110deg,
+        #c89b3c 0%,
+        #fff5cc 20%,
+        #f2c94c 42%,
+        #ffffff 50%,
+        #d4af37 68%,
+        #a67c2e 100%
+      );
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: goldShimmer 4.2s linear infinite;
+      filter: drop-shadow(0 8px 28px rgba(212, 175, 55, 0.48));
+    }
+
+    /* ============================================================
+       CALENDARIO DELL'AVVENTO 3D ARTIGIANALE ULTRA-REALISTICO
+       ============================================================ */
+    .advent-stage {
+      perspective: 1450px;
+      position: relative;
+    }
+
+    /* Cornice esterna in legno scuro e ottone */
+    .advent-box-shell {
+      position: relative;
+      width: 340px;
+      height: 380px;
+      max-width: 100%;
+      padding: 14px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, #2d1810 0%, #170b07 55%, #0e0604 100%);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.65),
+        inset 0 2px 3px rgba(255, 224, 150, 0.25),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.75),
+        0 0 0 1.5px rgba(212, 175, 55, 0.45);
+      transform-style: preserve-3d;
+    }
+
+    @media (max-width: 420px) {
+      .advent-box-shell {
+        width: 295px;
+        height: 340px;
+      }
+    }
+
+    /* Bagliore esterno invitante prima dell'apertura */
+    @keyframes gentleInvite {
+      0%, 100% { box-shadow: 0 30px 70px rgba(0,0,0,0.65), 0 0 22px rgba(242, 201, 76, 0.16), 0 0 0 1.5px rgba(212, 175, 55, 0.45); }
+      50% { box-shadow: 0 30px 70px rgba(0,0,0,0.65), 0 0 38px rgba(242, 201, 76, 0.34), 0 0 0 1.5px rgba(245, 215, 130, 0.72); }
+    }
+
+    .advent-box-shell:not(.is-open) {
+      animation: gentleInvite 3.4s ease-in-out infinite;
+    }
+
+    /* Nicchia interna illuminata */
+    .advent-niche {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      background: radial-gradient(circle at 50% 45%, #4a2810 0%, #241008 58%, #0f0604 100%);
+      box-shadow:
+        inset 0 12px 32px rgba(0, 0, 0, 0.85),
+        inset 0 0 42px rgba(255, 195, 85, 0.28);
+      border: 1px solid rgba(235, 198, 118, 0.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* Raggi volumetrici rotanti che si accendono all'apertura */
+    @keyframes spinRays {
+      from { transform: rotate(0deg) scale(0.95); }
+      to { transform: rotate(360deg) scale(0.95); }
+    }
+
+    .advent-light-rays {
+      position: absolute;
+      inset: -45%;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 224, 130, 0.26) 0deg 14deg,
+        transparent 14deg 30deg
+      );
+      opacity: 0;
+      transition: opacity 0.9s ease 0.15s;
+      animation: spinRays 24s linear infinite;
+      pointer-events: none;
+    }
+
+    .advent-box-shell.is-open .advent-light-rays {
+      opacity: 1;
+    }
+
+    /* Alone caldo centrale */
+    .advent-warm-core {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 46%, rgba(255, 226, 145, 0.55) 0%, rgba(217, 119, 6, 0.18) 45%, transparent 72%);
+      opacity: 0;
+      transition: opacity 0.8s ease 0.1s;
+      pointer-events: none;
+    }
+
+    .advent-box-shell.is-open .advent-warm-core {
+      opacity: 1;
+    }
+
+    /* Decorazione fluttuante nella nicchia */
+    @keyframes floatOrnament {
+      0%, 100% { transform: translateY(0px) scale(1.06); }
+      50% { transform: translateY(-9px) scale(1.11); }
+    }
+
+    .advent-ornament {
+      position: relative;
+      z-index: 2;
+      font-size: 5.2rem;
+      line-height: 1;
+      filter: drop-shadow(0 12px 24px rgba(255, 200, 80, 0.6));
+      transform: scale(0.55) translateY(16px);
+      opacity: 0;
+      transition: transform 0.85s cubic-bezier(0.22, 1.25, 0.36, 1) 0.22s, opacity 0.7s ease 0.2s;
+    }
+
+    .advent-box-shell.is-open .advent-ornament {
+      opacity: 1;
+      transform: scale(1.06) translateY(0);
+      animation: floatOrnament 3.6s ease-in-out 1s infinite;
+    }
+
+    .advent-niche-caption {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s;
+    }
+
+    .advent-box-shell.is-open .advent-niche-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Cerniere metalliche in ottone sul lato sinistro */
+    .brass-hinge {
+      position: absolute;
+      left: 7px;
+      width: 12px;
+      height: 44px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6e4f12 0%, #f7df8a 38%, #c5982e 72%, #5e410d 100%);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    .brass-hinge.top { top: 58px; }
+    .brass-hinge.bottom { bottom: 58px; }
+
+    /* Porticina 3D con spessore e rotazione meccanica naturale */
+    .advent-door-pivot {
+      position: absolute;
+      inset: 14px;
+      border-radius: 18px;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.25s cubic-bezier(0.22, 1.12, 0.32, 1);
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    .advent-box-shell.is-open .advent-door-pivot {
+      transform: rotateY(-132deg);
+    }
+
+    /* Lato frontale della porticina (velluto bordeaux / verde abete + lamina oro) */
+    .advent-door-front {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background:
+        radial-gradient(circle at 30% 22%, rgba(255, 215, 130, 0.14) 0%, transparent 55%),
+        linear-gradient(148deg, #7c1922 0%, #520d15 52%, #291815 100%);
+      border: 2px solid rgba(226, 187, 102, 0.78);
+      box-shadow:
+        inset 0 0 0 10px rgba(15, 4, 6, 0.28),
+        inset 0 0 0 12px rgba(226, 187, 102, 0.42),
+        0 14px 32px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+      transition: filter 0.35s ease;
+    }
+
+    .advent-door-pivot:hover .advent-door-front {
+      filter: brightness(1.07);
+    }
+
+    /* Angoli decorativi in oro in rilievo */
+    .gold-corner {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-color: rgba(242, 207, 125, 0.78);
+      pointer-events: none;
+    }
+    .gold-corner.tl { top: 20px; left: 20px; border-top: 2px solid; border-left: 2px solid; border-top-left-radius: 4px; }
+    .gold-corner.tr { top: 20px; right: 20px; border-top: 2px solid; border-right: 2px solid; border-top-right-radius: 4px; }
+    .gold-corner.bl { bottom: 20px; left: 20px; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 4px; }
+    .gold-corner.br { bottom: 20px; right: 20px; border-bottom: 2px solid; border-right: 2px solid; border-bottom-right-radius: 4px; }
+
+    /* Spessore laterale 3D del bordo destro della porticina */
+    .advent-door-thickness {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      right: -8px;
+      width: 10px;
+      background: linear-gradient(180deg, #9e7422 0%, #f2d27c 50%, #7d5914 100%);
+      transform: rotateY(90deg);
+      transform-origin: left center;
+      border-radius: 2px;
+    }
+
+    /* Lato interno della porticina */
+    .advent-door-back {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: rotateY(180deg);
+      background: linear-gradient(145deg, #2d1316 0%, #150709 100%);
+      border: 1.5px solid rgba(226, 187, 102, 0.45);
+      box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.68);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Nastro di raso dorato e sigillo in ceralacca rossa */
+    .satin-ribbon {
+      position: absolute;
+      right: 28px;
+      top: 0;
+      bottom: 0;
+      width: 14px;
+      background: linear-gradient(90deg, #9c7420 0%, #f8df95 48%, #9c7420 100%);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.45s ease;
+    }
+
+    .advent-box-shell.is-open .satin-ribbon {
+      transform: scaleY(0.15);
+      opacity: 0;
+    }
+
+    .wax-seal {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 46px;
+      height: 46px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 35% 30%, #dc2626 0%, #991b1b 55%, #5c0b0b 100%);
+      border: 2px solid rgba(248, 215, 130, 0.72);
+      box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.58),
+        inset 0 2px 5px rgba(255, 200, 180, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fde68a;
+      font-size: 1.05rem;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+    }
+
+    .advent-box-shell.is-open .wax-seal {
+      transform: translateY(-50%) scale(1.45) rotate(28deg);
+      opacity: 0;
+    }
+
+    /* Canvas dedicato all'esplosione fisica di scintille e fiocchi dalla porticina */
+    #doorBurstCanvas {
+      position: absolute;
+      inset: -85px;
+      width: calc(100% + 170px);
+      height: calc(100% + 170px);
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Pannello pergamena/vetro caldo affiancato a destra */
+    .advent-card-reveal {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    .advent-card-reveal.is-sealed {
+      opacity: 0.78;
+      transform: translateX(6px);
+    }
+
+    .advent-card-reveal.is-revealed {
+      opacity: 1;
+      transform: translateX(0);
+      border-color: rgba(242, 207, 125, 0.55);
+      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.42), 0 0 36px rgba(242, 207, 125, 0.14);
+    }
+
+    /* Raggio di luce dorata che attraversa la card quando si svela */
+    @keyframes sweepGold {
+      0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+      35% { opacity: 0.65; }
+      100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+
+    .gold-sweep {
+      position: absolute;
+      inset: 0;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255, 226, 145, 0.28), transparent);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .gold-sweep.active {
+      animation: sweepGold 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Sfocatura leggera del contenuto prima di aprire la porticina */
+    .sealed-blur {
+      filter: blur(5px);
+      user-select: none;
+      transition: filter 0.75s ease 0.15s, opacity 0.75s ease 0.15s;
+    }
+
+    .advent-card-reveal.is-revealed .sealed-blur {
+      filter: blur(0);
+      user-select: auto;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-300/30">
+
+  <!-- =======================================================================
+       1. SCHERMATA HOME (COLORE NEUTRO DI LUSSO)
+       ======================================================================= -->
+  <div id="homeView" class="view-section min-h-screen w-full relative overflow-hidden" style="background: radial-gradient(circle at 18% 0%, #FAF8F4 0%, #F5F2EC 52%, #EAE5DC 100%);">
+    <!-- Dettaglio geometrico leggerissimo sullo sfondo neutro -->
+    <div class="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-35" style="background: radial-gradient(circle, rgba(154, 123, 79, 0.16) 0%, transparent 70%);"></div>
+    <div class="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full opacity-35" style="background: radial-gradient(circle, rgba(154, 123, 79, 0.12) 0%, transparent 70%);"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 lg:px-10 py-14 sm:py-20 flex flex-col gap-12 sm:gap-16">
+      <!-- Intestazione Editoriale e Descrizione del Sito -->
+      <header class="text-center max-w-2xl mx-auto space-y-5 animate-enter">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-[11px] uppercase tracking-[0.26em] font-semibold" style="border-color: rgba(154, 123, 79, 0.35); color: #9A7B4F; background: rgba(255,255,255,0.65);">
+          <span>✦</span>
+          <span>Collezione di Date Speciali</span>
+        </div>
+
+        <h1 class="font-editorial text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.04]" style="color: #1E1D1B;">
+          Attese &amp; Stagioni
+        </h1>
+
+        <div class="w-16 h-[1.5px] mx-auto" style="background: linear-gradient(90deg, transparent, #9A7B4F, transparent);"></div>
+
+        <p class="text-sm sm:text-base leading-relaxed font-normal max-w-xl mx-auto" style="color: #5C5750;">
+          Un rifugio digitale dedicato ai momenti più attesi dell’anno. Scegli una data qui sotto per immergerti nella sua atmosfera fotografica e animata e, nella sezione <strong class="font-semibold" style="color:#1E1D1B;">Natale</strong>, scopri ogni giorno di dicembre una nuova casella del Calendario dell’Avvento 3D.
+        </p>
+      </header>
+
+      <!-- Griglia Elegante delle 6 Sezioni Cliccabili -->
+      <section aria-label="Scegli un evento">
+        <div class="flex items-center justify-between mb-6 px-1">
+          <h2 class="font-editorial text-2xl sm:text-3xl font-semibold" style="color: #1E1D1B;">
+            Seleziona un appuntamento
+          </h2>
+          <span class="text-xs uppercase tracking-[0.2em] font-medium" style="color: #9A7B4F;">
+            6 Atmosfere
+          </span>
+        </div>
+
+        <div id="homeCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+          <!-- Card generate dinamicamente via JS con anteprima foto e giorni mancanti -->
+        </div>
+      </section>
+
+      <!-- Footer discreto della Home -->
+      <footer class="text-center pt-4 pb-2 text-xs tracking-wide" style="color: #847E75;">
+        Ogni data cambia luce, fotografia e animazione • Conto alla rovescia in tempo reale
+      </footer>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       2. SCHERMATA DI SELEZIONE EVENTO (FOTOGRAFIA + CANVAS + COUNTDOWN + AVVENTO)
+       ======================================================================= -->
+  <div id="eventView" class="view-section view-hidden min-h-screen w-full relative text-white flex flex-col justify-between overflow-hidden">
+
+    <!-- Livello Sfondo Fotografico Realistico + Effetto Ken Burns -->
+    <div id="eventBgFallback" class="fixed inset-0 z-0 transition-all duration-1000"></div>
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      <img
+        id="eventBgPhoto"
+        src=""
+        alt=""
+        class="w-full h-full object-cover ken-burns-img opacity-0 transition-opacity duration-1000"
+      />
+      <!-- Overlay atmosferico per leggibilità ottimale -->
+      <div id="eventBgOverlay" class="absolute inset-0 transition-all duration-1000"></div>
+    </div>
+
+    <!-- Canvas HTML5 per le animazioni atmosferiche (neve, fuochi, petali, brezza, mare) -->
+    <canvas id="atmosphereCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+    <!-- Barra Superiore Semi-Trasparente (Torna alla Home + Selettore Rapido) -->
+    <header class="relative z-20 w-full border-b border-white/15 bg-black/25 backdrop-blur-xl">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <button
+          id="backToHomeBtn"
+          type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/20 transition cursor-pointer"
+        >
+          <span>←</span>
+          <span>Torna alla Home</span>
+        </button>
+
+        <nav id="quickEventNav" aria-label="Cambio rapido evento" class="flex items-center gap-1.5 overflow-x-auto max-w-full pb-0.5">
+          <!-- Pillole di cambio rapido generate via JS -->
+        </nav>
+      </div>
+    </header>
+
+    <!-- Contenuto Principale della Vista Evento -->
+    <main class="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 flex-grow flex flex-col items-center gap-9 sm:gap-12">
+
+      <!-- Intestazione Evento -->
+      <div class="text-center space-y-2.5 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium tracking-[0.18em] uppercase bg-black/30 border border-white/25 backdrop-blur-md">
+          <span id="activeEventIcon">❄</span>
+          <span id="activeThemeName">Atmosfera Invernale</span>
+        </div>
+        <h1 id="activeEventTitle" class="font-editorial text-5xl sm:text-7xl font-semibold tracking-tight drop-shadow-lg leading-none">
+          Natale 2026
+        </h1>
+        <p id="activeEventDate" class="text-xs sm:text-sm uppercase tracking-[0.24em] text-white/85 font-medium">
+          Venerdì 25 Dicembre 2026
+        </p>
+      </div>
+
+      <!-- GRANDE SCRITTA 25 DICEMBRE (Solo nella sezione Natale il 25 Dicembre) -->
+      <section id="christmasDayHero" class="hidden w-full max-w-4xl glass-dark rounded-3xl p-10 sm:p-16 text-center border-amber-200/40">
+        <p class="text-xs sm:text-sm uppercase tracking-[0.32em] text-amber-200 font-semibold mb-4">
+          ✦ 25 Dicembre • Giorno di Festa ✦
+        </p>
+        <h2 class="font-editorial text-6xl sm:text-8xl md:text-9xl font-bold tracking-wide gold-shimmer-text leading-none">
+          Buon Natale!
+        </h2>
+        <p class="mt-6 text-base sm:text-xl font-light text-white/90 max-w-2xl mx-auto leading-relaxed">
+          Che questa giornata sia piena di calore, luce, abbracci sinceri e piccoli istanti di meraviglia da custodire nel cuore.
+        </p>
+      </section>
+
+      <!-- CONTO ALLA ROVESCIA GLASSMORPHISM -->
+      <section id="countdownWrapper" class="w-full max-w-4xl">
+        <div id="countdownGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6">
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdDays" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Giorni</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdHours" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Ore</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdMinutes" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Minuti</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdSeconds" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Secondi</span>
+          </div>
+        </div>
+
+        <div id="eventReachedCard" class="hidden glass-dark rounded-3xl p-8 text-center">
+          <p id="eventReachedText" class="font-editorial text-3xl sm:text-4xl font-semibold"></p>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           3. CALENDARIO DELL'AVVENTO 3D ULTRA-REALISTICO (SOLO IN NATALE)
+           Layout grande (max-w-5xl) a due colonne affiancate:
+           Sinistra = Porticina 3D artigianale | Destra = Frase e Attività
+           =================================================================== -->
+      <section id="adventSection" class="hidden w-full max-w-[1060px]">
+        <div class="glass-dark rounded-[32px] p-6 sm:p-10 lg:p-12 border border-amber-200/30">
+          <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-10 lg:gap-12">
+
+            <!-- COLONNA SINISTRA: Grande Porticina 3D del Calendario dell'Avvento -->
+            <div class="flex flex-col items-center justify-center shrink-0">
+              <div class="advent-stage">
+                <!-- Canvas per l'esplosione fisica di scintille, stelle e fiocchi -->
+                <canvas id="doorBurstCanvas"></canvas>
+
+                <div
+                  id="adventBox"
+                  class="advent-box-shell"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Apri la casella del Calendario dell'Avvento"
+                >
+                  <!-- Cerniere in ottone -->
+                  <div class="brass-hinge top" aria-hidden="true"></div>
+                  <div class="brass-hinge bottom" aria-hidden="true"></div>
+
+                  <!-- Interno della nicchia con raggi dorati e decorazione fluttuante -->
+                  <div class="advent-niche">
+                    <div class="advent-light-rays" aria-hidden="true"></div>
+                    <div class="advent-warm-core" aria-hidden="true"></div>
+                    <span id="adventOrnament" class="advent-ornament" aria-hidden="true">🕯️</span>
+                    <div class="advent-niche-caption text-center px-4">
+                      <p id="adventNicheDate" class="font-editorial text-2xl font-semibold text-amber-100 tracking-wide">
+                        1 Dicembre
+                      </p>
+                      <p class="text-[11px] uppercase tracking-[0.22em] text-amber-200/80 mt-0.5">
+                        Casella svelata
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Porticina 3D che ruota sui cardini a sinistra -->
+                  <div id="adventDoorPivot" class="advent-door-pivot">
+                    <div class="advent-door-thickness" aria-hidden="true"></div>
+
+                    <!-- Fronte in velluto bordeaux, angoli oro, nastro raso e sigillo ceralacca -->
+                    <div class="advent-door-front">
+                      <div class="gold-corner tl"></div>
+                      <div class="gold-corner tr"></div>
+                      <div class="gold-corner bl"></div>
+                      <div class="gold-corner br"></div>
+
+                      <div class="satin-ribbon" aria-hidden="true"></div>
+                      <div class="wax-seal" aria-hidden="true">✦</div>
+
+                      <span class="text-[11px] uppercase tracking-[0.3em] text-amber-200/85 font-semibold mb-2">
+                        Avvento • Dicembre
+                      </span>
+                      <span id="adventDoorNumber" class="font-editorial text-8xl sm:text-9xl font-bold text-amber-200 leading-none drop-shadow-[0_6px_16px_rgba(0,0,0,0.65)]">
+                        1
+                      </span>
+                      <span id="adventDoorPrompt" class="mt-5 px-4 py-1.5 rounded-full bg-black/30 border border-amber-200/35 text-[11px] uppercase tracking-[0.18em] text-amber-100 font-medium text-center">
+                        Clicca per aprire la casella del giorno 1
+                      </span>
+                    </div>
+
+                    <!-- Retro della porticina -->
+                    <div class="advent-door-back">
+                      <span class="font-editorial text-4xl text-amber-200/35">✦</span>
+                      <span class="mt-2 text-[10px] uppercase tracking-[0.26em] text-amber-200/35">
+                        Buon Avvento
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                id="toggleDoorBtn"
+                type="button"
+                class="mt-5 px-4 py-1.5 rounded-full text-xs uppercase tracking-[0.2em] text-amber-200/90 hover:text-amber-100 bg-white/5 hover:bg-white/15 border border-amber-200/25 transition cursor-pointer font-medium"
+              >
+                Apri / Richiudi porticina
+              </button>
+            </div>
+
+            <!-- COLONNA DESTRA (ACCANTO AL GIORNO): Frase Natalizia + Cosa Fare Oggi -->
+            <div
+              id="adventCardReveal"
+              class="advent-card-reveal is-sealed flex-1 rounded-3xl p-7 sm:p-9 bg-gradient-to-br from-[#231512]/80 via-[#1a1110]/85 to-[#120b0a]/90 border border-amber-200/25 flex flex-col justify-center text-left w-full"
+            >
+              <div id="goldSweepEl" class="gold-sweep" aria-hidden="true"></div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <span id="adventDayTag" class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] font-semibold text-amber-200">
+                  ✦ Calendario dell'Avvento • Giorno 1 di 24
+                </span>
+                <span id="adventPreviewBadge" class="hidden text-[11px] px-3 py-0.5 rounded-full bg-amber-300/20 border border-amber-200/45 text-amber-100 font-medium">
+                  Modalità Anteprima
+                </span>
+              </div>
+
+              <!-- Messaggio invito quando la porticina è ancora chiusa -->
+              <p id="adventSealedHint" class="text-xs uppercase tracking-[0.2em] text-amber-200/75 mb-3 font-medium">
+                🔒 Apri la porticina a sinistra per svelare il pensiero e l'attività di oggi
+              </p>
+
+              <!-- Contenuto che si svela nitidamente all'apertura -->
+              <div class="sealed-blur space-y-6">
+                <blockquote id="adventQuoteText" class="font-editorial italic text-3xl sm:text-4xl leading-snug font-medium text-amber-50">
+                  “Dicembre è arrivato: lascia che la luce delle piccole cose scaldi ogni giornata.”
+                </blockquote>
+
+                <div class="rounded-2xl p-5 sm:p-6 bg-black/35 border border-amber-200/25">
+                  <p class="text-[11px] uppercase tracking-[0.26em] text-amber-200 font-semibold mb-2">
+                    ✦ Cosa fare oggi
+                  </p>
+                  <p id="adventActivityText" class="text-sm sm:text-base font-light leading-relaxed text-white/95">
+                    Crea una playlist con le tue canzoni natalizie preferite e accendi una candela profumata.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- BARRA DISCRETA ANTEPRIMA AVVENTO (VISIBILE SOLO NELLA SEZIONE NATALE) -->
+      <section id="adventPreviewSection" class="hidden w-full max-w-[1060px]">
+        <div class="flex flex-col items-center gap-3">
+          <button
+            id="togglePreviewPanelBtn"
+            type="button"
+            class="glass-dark px-5 py-2.5 rounded-full text-xs tracking-wide font-medium text-amber-100/90 hover:text-white transition flex items-center gap-2.5 cursor-pointer"
+            aria-expanded="false"
+            aria-controls="adventPreviewPanel"
+          >
+            <span>✦</span>
+            <span>Anteprima Avvento (1–25 Dicembre)</span>
+            <span id="previewArrow" class="transition-transform duration-300">▾</span>
+          </button>
+
+          <div id="adventPreviewPanel" class="hidden w-full glass-dark rounded-3xl p-5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="font-editorial text-2xl font-semibold text-amber-100">Simula un giorno di Dicembre</h3>
+                <p class="text-xs text-white/75">Scegli una casella dal 1 al 24 per provare l’apertura 3D del Calendario dell’Avvento o seleziona il 25 Dicembre.</p>
+              </div>
+              <button
+                id="resetRealDateBtn"
+                type="button"
+                class="px-4 py-2 rounded-full text-xs font-medium bg-white/15 hover:bg-white/25 border border-white/25 transition cursor-pointer"
+              >
+                ↺ Data Reale
+              </button>
+            </div>
+
+            <div id="previewDaysGrid" class="grid grid-cols-5 sm:grid-cols-9 gap-2">
+              <!-- Pulsanti 1..25 generati via JS -->
+            </div>
+
+            <p id="previewStatusNote" class="mt-3.5 text-xs text-white/75 text-center"></p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    /*************************************************************************
+     * 1. CONFIGURAZIONE DEI 6 EVENTI CON FOTOGRAFIE REALISTICHE E TEMI
+     *************************************************************************/
+    const EVENTS = [
+      {
+        id: 'natale',
+        label: 'Natale',
+        title: 'Natale 2026',
+        icon: '❄',
+        themeName: 'Inverno & Luci Calde',
+        tagline: 'Neve soffice, luci calde e Calendario dell’Avvento 3D.',
+        year: 2026,
+        month: 11, // Dicembre (0-indexed)
+        day: 25,
+        recurringAnnual: true,
+        canvasMode: 'christmas',
+        photoUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'radial-gradient(circle at 20% 15%, #3d141a 0%, #162920 50%, #09130f 100%)',
+        overlay: 'linear-gradient(180deg, rgba(10, 14, 13, 0.56) 0%, rgba(12, 18, 16, 0.44) 48%, rgba(8, 12, 11, 0.78) 100%)'
+      },
+      {
+        id: 'capodanno',
+        label: 'Capodanno 2027',
+        title: 'Capodanno 2027',
+        icon: '✦',
+        themeName: 'Mezzanotte & Fuochi d’Artificio',
+        tagline: 'Scintille dorate, brindisi e un nuovo anno da iniziare.',
+        year: 2027,
+        month: 0, // Gennaio
+        day: 1,
+        recurringAnnual: false,
+        canvasMode: 'newyear',
+        photoUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'radial-gradient(circle at 50% 0%, #1e2a4a 0%, #0b1124 58%, #040711 100%)',
+        overlay: 'linear-gradient(180deg, rgba(6, 10, 24, 0.58) 0%, rgba(7, 12, 28, 0.45) 50%, rgba(4, 7, 18, 0.8) 100%)'
+      },
+      {
+        id: 'pasqua',
+        label: 'Pasqua',
+        title: 'Pasqua 2027',
+        icon: '✿',
+        themeName: 'Primavera & Ciliegi in Fiore',
+        tagline: 'Petali leggeri, luce morbida e profumo di rinascita.',
+        year: 2027,
+        month: 2, // Marzo
+        day: 28,
+        recurringAnnual: false,
+        canvasMode: 'easter',
+        photoUrl: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(145deg, #4b5d52 0%, #7d6272 52%, #b08488 100%)',
+        overlay: 'linear-gradient(180deg, rgba(28, 22, 30, 0.48) 0%, rgba(35, 24, 34, 0.36) 50%, rgba(24, 18, 26, 0.68) 100%)'
+      },
+      {
+        id: 'marzo2',
+        label: '2 Marzo 2027',
+        title: '2 Marzo 2027',
+        icon: '◈',
+        themeName: 'Alba di Fine Inverno',
+        tagline: 'Aria cristallina d’alta quota e prime luci dorate.',
+        year: 2027,
+        month: 2, // Marzo
+        day: 2,
+        recurringAnnual: false,
+        canvasMode: 'march',
+        photoUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(155deg, #1b2a3b 0%, #334e68 52%, #627d98 100%)',
+        overlay: 'linear-gradient(180deg, rgba(14, 24, 38, 0.52) 0%, rgba(18, 30, 46, 0.38) 50%, rgba(10, 18, 30, 0.72) 100%)'
+      },
+      {
+        id: 'maggio31',
+        label: '31 Maggio',
+        title: '31 Maggio 2027',
+        icon: '☼',
+        themeName: 'Tramonto di Tarda Primavera',
+        tagline: 'Campi in fiore, luce ambrata e serate che si allungano.',
+        year: 2027,
+        month: 4, // Maggio
+        day: 31,
+        recurringAnnual: true,
+        canvasMode: 'may',
+        photoUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(145deg, #1f3c2d 0%, #6b4728 52%, #bd712f 100%)',
+        overlay: 'linear-gradient(180deg, rgba(28, 22, 14, 0.46) 0%, rgba(36, 26, 14, 0.34) 50%, rgba(20, 15, 10, 0.72) 100%)'
+      },
+      {
+        id: 'luglio1',
+        label: '1 Luglio',
+        title: '1 Luglio 2027',
+        icon: '☀',
+        themeName: 'Estate & Mare Mediterraneo',
+        tagline: 'Acqua turchese, sole alto e brezza estiva.',
+        year: 2027,
+        month: 6, // Luglio
+        day: 1,
+        recurringAnnual: true,
+        canvasMode: 'summer',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(155deg, #0a3556 0%, #0e6b85 52%, #c9973e 100%)',
+        overlay: 'linear-gradient(180deg, rgba(8, 30, 48, 0.45) 0%, rgba(10, 42, 62, 0.32) 50%, rgba(6, 24, 38, 0.68) 100%)'
+      }
+    ];
+
+    /*************************************************************************
+     * 2. 24 GIORNI DEL CALENDARIO DELL'AVVENTO (FRASI + ATTIVITÀ + DECORAZIONE)
+     *************************************************************************/
+    const ADVENT_DATA = [
+      { day: 1,  icon: '🕯️', quote: 'Dicembre è arrivato: lascia che la luce delle piccole cose scaldi ogni giornata.', activity: 'Crea una playlist con le tue canzoni natalizie preferite e accendi una candela profumata.' },
+      { day: 2,  icon: '✉️', quote: 'Il Natale inizia nel momento in cui scegliamo di dedicare tempo autentico a chi amiamo.', activity: 'Scrivi la lista delle persone a cui vuoi riservare un pensiero o un augurio speciale.' },
+      { day: 3,  icon: '✨', quote: 'Una luce calda alla finestra regala un sorriso anche a chi passa soltanto per caso.', activity: 'Sistema una fila di lucine calde in stanza o sul balcone per creare subito atmosfera.' },
+      { day: 4,  icon: '💌', quote: 'La gentilezza è il dono più prezioso che puoi offrire senza spendere nulla.', activity: 'Invia un messaggio sincero e inaspettato a un amico o parente che non senti da tempo.' },
+      { day: 5,  icon: '☕', quote: 'Il profumo di cannella e agrumi trasforma un pomeriggio freddo in un ricordo felice.', activity: 'Prepara una cioccolata calda o una tisana speziata e gustala lontano dallo smartphone.' },
+      { day: 6,  icon: '🎀', quote: 'Ogni decorazione custodisce una storia e il calore degli inverni passati.', activity: 'Realizza una piccola decorazione natalizia fatta a mano con carta, spago o rametti di pino.' },
+      { day: 7,  icon: '📖', quote: 'La vera festa nasce dalla gratitudine per ciò che già illumina la nostra vita.', activity: 'Annota su un foglio tre momenti belli di quest’anno per cui ti senti grato.' },
+      { day: 8,  icon: '🎄', quote: 'È il giorno perfetto per vestire la casa di colori, stelle e allegria.', activity: 'Addobba l’albero di Natale o il presepe insieme alla famiglia o agli amici.' },
+      { day: 9,  icon: '🎬', quote: 'Un film di Natale sotto una coperta calda è il miglior rifugio dal freddo.', activity: 'Organizza una serata cinema con un grande classico natalizio e qualcosa di buono da sgranocchiare.' },
+      { day: 10, icon: '🌟', quote: 'Un piccolo gesto gentile accende una scintilla che sa moltiplicarsi.', activity: 'Fai una cortesia inattesa: lascia un bigliettino positivo o offri un caffè a qualcuno.' },
+      { day: 11, icon: '🍪', quote: 'Il profumo dei biscotti appena sfornati è la colonna sonora più dolce dell’inverno.', activity: 'Prepara dei biscotti di pasta frolla o speziati e condividili con chi ti sta vicino.' },
+      { day: 12, icon: '🌃', quote: 'Camminare sotto le luminarie di dicembre fa tornare tutti un po’ bambini.', activity: 'Fai una passeggiata serale per ammirare le luci della città o visita un mercatino.' },
+      { day: 13, icon: '🎁', quote: 'Anche nelle giornate più corte, la luce più forte resta quella che portiamo dentro.', activity: 'Riordina un angolo di casa e metti da parte qualcosa in ottimo stato da donare.' },
+      { day: 14, icon: '📷', quote: 'I ricordi più belli non si impacchettano, si rivivono insieme.', activity: 'Sfoglia vecchie foto dei Natali passati e racconta i momenti più divertenti.' },
+      { day: 15, icon: '🎗️', quote: 'Mancano solo dieci giorni: rallenta il passo e assapora la bellezza dell’attesa.', activity: 'Inizia a confezionare i regali con cura, usando nastri e biglietti scritti a mano.' },
+      { day: 16, icon: '🖋️', quote: 'Le parole scritte col cuore durano molto più a lungo di qualsiasi oggetto.', activity: 'Scrivi almeno tre biglietti d’auguri personalizzati a mano per le persone più care.' },
+      { day: 17, icon: '🎶', quote: 'La musica delle feste ha il potere silenzioso di unire generazioni diverse.', activity: 'Metti in sottofondo i tuoi brani preferiti di Natale mentre cucini o sistemi casa.' },
+      { day: 18, icon: '🎲', quote: 'Condividere un gioco attorno a un tavolo significa regalarsi risate vere.', activity: 'Organizza una serata a carte, tombola o con un gioco da tavolo in compagnia.' },
+      { day: 19, icon: '❄️', quote: 'Ogni fiocco di neve è unico, proprio come il tempo che dedichi al tuo benessere.', activity: 'Concediti un’ora di pieno relax: leggi qualche pagina, ascolta musica o riposa senza fretta.' },
+      { day: 20, icon: '🍰', quote: 'La tavola delle feste è il luogo in cui gli abbracci diventano profumi e sapori.', activity: 'Aiuta a scegliere il menù delle feste o prepara la lista per un dolce speciale.' },
+      { day: 21, icon: '🌠', quote: 'Con il solstizio d’inverno la luce ricomincia a crescere, giorno dopo giorno.', activity: 'Fai un brindisi simbolico all’inverno e scrivi un desiderio per il nuovo anno.' },
+      { day: 22, icon: '📞', quote: 'Non serve la perfezione per un Natale meraviglioso, basta la sincerità.', activity: 'Chiama una persona lontana o un nonno per fare una chiacchierata senza guardare l’orologio.' },
+      { day: 23, icon: '🔔', quote: 'L’aria profuma di attesa: l’incanto della Vigilia è ormai a un passo.', activity: 'Sistema gli ultimi dettagli con calma, prepara i pacchetti sotto l’albero e goditi la serata.' },
+      { day: 24, icon: '⭐', quote: 'È la Vigilia di Natale: apri il cuore alla meraviglia, alla pace e agli abbracci più veri.', activity: 'Lascia andare ogni pensiero, goditi la cena della Vigilia e scambia gli auguri a mezzanotte!' }
+    ];
+
+    /*************************************************************************
+     * 3. STATO E RIFERIMENTI DOM
+     *************************************************************************/
+    let currentView = 'home'; // 'home' | 'event'
+    let selectedEventId = 'natale';
+    let simulatedDecemberDay = null; // null = data reale; 1..25 = simulazione
+    let isDoorOpen = false;
+    let lastRenderedSecond = null;
+
+    const homeView = document.getElementById('homeView');
+    const eventView = document.getElementById('eventView');
+    const homeCardsGrid = document.getElementById('homeCardsGrid');
+    const backToHomeBtn = document.getElementById('backToHomeBtn');
+    const quickEventNav = document.getElementById('quickEventNav');
+
+    const eventBgFallback = document.getElementById('eventBgFallback');
+    const eventBgPhoto = document.getElementById('eventBgPhoto');
+    const eventBgOverlay = document.getElementById('eventBgOverlay');
+
+    const activeEventIcon = document.getElementById('activeEventIcon');
+    const activeThemeName = document.getElementById('activeThemeName');
+    const activeEventTitle = document.getElementById('activeEventTitle');
+    const activeEventDate = document.getElementById('activeEventDate');
+
+    const cdDays = document.getElementById('cdDays');
+    const cdHours = document.getElementById('cdHours');
+    const cdMinutes = document.getElementById('cdMinutes');
+    const cdSeconds = document.getElementById('cdSeconds');
+    const countdownWrapper = document.getElementById('countdownWrapper');
+    const countdownGrid = document.getElementById('countdownGrid');
+    const eventReachedCard = document.getElementById('eventReachedCard');
+    const eventReachedText = document.getElementById('eventReachedText');
+    const christmasDayHero = document.getElementById('christmasDayHero');
+
+    const adventSection = document.getElementById('adventSection');
+    const adventBox = document.getElementById('adventBox');
+    const adventDoorNumber = document.getElementById('adventDoorNumber');
+    const adventDoorPrompt = document.getElementById('adventDoorPrompt');
+    const adventOrnament = document.getElementById('adventOrnament');
+    const adventNicheDate = document.getElementById('adventNicheDate');
+    const adventCardReveal = document.getElementById('adventCardReveal');
+    const adventSealedHint = document.getElementById('adventSealedHint');
+    const goldSweepEl = document.getElementById('goldSweepEl');
+    const adventDayTag = document.getElementById('adventDayTag');
+    const adventPreviewBadge = document.getElementById('adventPreviewBadge');
+    const adventQuoteText = document.getElementById('adventQuoteText');
+    const adventActivityText = document.getElementById('adventActivityText');
+    const toggleDoorBtn = document.getElementById('toggleDoorBtn');
+
+    const adventPreviewSection = document.getElementById('adventPreviewSection');
+    const togglePreviewPanelBtn = document.getElementById('togglePreviewPanelBtn');
+    const adventPreviewPanel = document.getElementById('adventPreviewPanel');
+    const previewArrow = document.getElementById('previewArrow');
+    const previewDaysGrid = document.getElementById('previewDaysGrid');
+    const resetRealDateBtn = document.getElementById('resetRealDateBtn');
+    const previewStatusNote = document.getElementById('previewStatusNote');
+
+    /*************************************************************************
+     * 4. UTILITÀ DATE
+     *************************************************************************/
+    function getEffectiveNow() {
+      const realNow = new Date();
+      if (simulatedDecemberDay !== null && currentView === 'event' && selectedEventId === 'natale') {
+        return new Date(
+          realNow.getFullYear(),
+          11,
+          simulatedDecemberDay,
+          realNow.getHours(),
+          realNow.getMinutes(),
+          realNow.getSeconds()
+        );
+      }
+      return realNow;
+    }
+
+    function getTargetDate(ev, now) {
+      let targetYear = ev.year;
+      let target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+      if (ev.recurringAnnual) {
+        const endOfDay = new Date(targetYear, ev.month, ev.day, 23, 59, 59);
+        if (now > endOfDay) {
+          targetYear = now.getFullYear();
+          target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+          if (now > new Date(targetYear, ev.month, ev.day, 23, 59, 59)) {
+            targetYear += 1;
+            target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+          }
+        }
+      }
+      return target;
+    }
+
+    function formatItalianDate(date) {
+      const str = new Intl.DateTimeFormat('it-IT', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function formatShortDate(date) {
+      return new Intl.DateTimeFormat('it-IT', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+    }
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function getSelectedEvent() {
+      return EVENTS.find(e => e.id === selectedEventId) || EVENTS[0];
+    }
+
+    /*************************************************************************
+     * 5. HOME NEUTRA: COSTRUZIONE DELLE 6 CARD CON MINI-FOTO E GIORNI MANCANTI
+     *************************************************************************/
+    function renderHomeCards() {
+      const now = new Date();
+      homeCardsGrid.innerHTML = '';
+
+      EVENTS.forEach(ev => {
+        const target = getTargetDate(ev, now);
+        const diffMs = target.getTime() - now.getTime();
+        const daysLeft = Math.max(0, Math.ceil(diffMs / 86400000));
+        const displayTitle = ev.recurringAnnual ? `${ev.label} ${target.getFullYear()}` : ev.title;
+
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'home-card group rounded-3xl overflow-hidden text-left flex flex-col cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#9A7B4F]';
+
+        const daysLabel = daysLeft === 0 ? 'Oggi' : (daysLeft === 1 ? 'Manca 1 giorno' : `Mancano ${daysLeft} giorni`);
+
+        card.innerHTML = `
+          <div class="relative h-48 w-full overflow-hidden" style="background: ${ev.fallbackBg};">
+            <img
+              src="${ev.thumbUrl}"
+              alt="${displayTitle}"
+              loading="lazy"
+              onerror="this.style.display='none'"
+              class="w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"></div>
+            <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-wide bg-white/90 text-[#1E1D1B] shadow-sm">
+              ${ev.icon} ${ev.themeName}
+            </div>
+            <div class="absolute bottom-3.5 right-3.5 px-3 py-1 rounded-full text-xs font-semibold bg-black/55 backdrop-blur-md text-white border border-white/20" data-home-days="${ev.id}">
+              ${daysLabel}
+            </div>
+          </div>
+          <div class="p-6 flex flex-col flex-grow justify-between gap-4">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.2em] font-semibold mb-1.5" style="color: #9A7B4F;">
+                ${formatShortDate(target)}
+              </p>
+              <h3 class="font-editorial text-3xl font-semibold leading-tight" style="color: #1E1D1B;">
+                ${displayTitle}
+              </h3>
+              <p class="mt-2 text-xs sm:text-sm leading-relaxed" style="color: #66615A;">
+                ${ev.tagline}
+              </p>
+            </div>
+            <div class="pt-3 border-t flex items-center justify-between text-xs font-semibold tracking-wide" style="border-color: #EAE4D9; color: #1E1D1B;">
+              <span>Entra nell’atmosfera</span>
+              <span class="transition-transform duration-300 group-hover:translate-x-1.5" style="color: #9A7B4F;">→</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => openEventView(ev.id));
+        homeCardsGrid.appendChild(card);
+      });
+    }
+
+    function renderQuickEventNav() {
+      quickEventNav.innerHTML = '';
+      EVENTS.forEach(ev => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.quickId = ev.id;
+        btn.className = 'quick-nav-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer';
+        btn.textContent = `${ev.icon} ${ev.label}`;
+        btn.addEventListener('click', () => selectEvent(ev.id));
+        quickEventNav.appendChild(btn);
+      });
+    }
+
+    function updateQuickNavActive() {
+      document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+        const active = btn.dataset.quickId === selectedEventId;
+        btn.className = `quick-nav-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer ${
+          active
+            ? 'bg-white text-[#1E1D1B] border-white shadow-md'
+            : 'bg-white/10 text-white/85 border-white/20 hover:bg-white/20'
+        }`;
+      });
+    }
+
+    /*************************************************************************
+     * 6. NAVIGAZIONE HOME <-> VISTA EVENTO
+     *************************************************************************/
+    function openEventView(eventId) {
+      currentView = 'event';
+      homeView.classList.add('view-hidden');
+      eventView.classList.remove('view-hidden');
+      eventView.classList.add('animate-enter');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      resizeAtmosphereCanvas();
+      selectEvent(eventId);
+    }
+
+    function returnToHome() {
+      currentView = 'home';
+      eventView.classList.add('view-hidden');
+      homeView.classList.remove('view-hidden');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      renderHomeCards();
+    }
+
+    backToHomeBtn.addEventListener('click', returnToHome);
+
+    function selectEvent(eventId) {
+      selectedEventId = eventId;
+      const ev = getSelectedEvent();
+      updateQuickNavActive();
+
+      // Sfondo fotografico + fallback CSS
+      eventBgFallback.style.background = ev.fallbackBg;
+      eventBgOverlay.style.background = ev.overlay;
+      eventBgPhoto.style.opacity = '0';
+
+      const loader = new Image();
+      loader.onload = () => {
+        if (selectedEventId === ev.id) {
+          eventBgPhoto.src = ev.photoUrl;
+          eventBgPhoto.alt = ev.title;
+          eventBgPhoto.style.opacity = '1';
+        }
+      };
+      loader.onerror = () => {
+        eventBgPhoto.style.opacity = '0';
+      };
+      loader.src = ev.photoUrl;
+
+      activeEventIcon.textContent = ev.icon;
+      activeThemeName.textContent = ev.themeName;
+
+      // Barra Anteprima Avvento visibile SOLO in Natale
+      if (ev.id === 'natale') {
+        adventPreviewSection.classList.remove('hidden');
+      } else {
+        adventPreviewSection.classList.add('hidden');
+        adventSection.classList.add('hidden');
+        christmasDayHero.classList.add('hidden');
+      }
+
+      setCanvasMode(ev.canvasMode);
+      updateCountdown();
+    }
+
+    /*************************************************************************
+     * 7. ANIMAZIONE 3D PORTICINA AVVENTO + MOTORE FISICO SCINTILLE
+     *************************************************************************/
+    const burstCanvas = document.getElementById('doorBurstCanvas');
+    const bCtx = burstCanvas.getContext('2d');
+    let burstParticles = [];
+    let burstAnimId = null;
+
+    function resizeBurstCanvas() {
+      const rect = burstCanvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      burstCanvas.width = rect.width * dpr;
+      burstCanvas.height = rect.height * dpr;
+      bCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function triggerDoorBurst() {
+      resizeBurstCanvas();
+      const rect = burstCanvas.getBoundingClientRect();
+      const cx = rect.width * 0.52;
+      const cy = rect.height * 0.5;
+      const colors = ['#fffbeb', '#fde68a', '#f59e0b', '#fbbf24', '#ffffff'];
+
+      for (let i = 0; i < 62; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.6 + Math.random() * 5.8;
+        const typeRand = Math.random();
+        burstParticles.push({
+          x: cx + (Math.random() - 0.5) * 35,
+          y: cy + (Math.random() - 0.5) * 60,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.4,
+          size: typeRand > 0.72 ? (4 + Math.random() * 4.5) : (1.8 + Math.random() * 3),
+          type: typeRand > 0.72 ? 'star' : (typeRand > 0.45 ? 'flake' : 'spark'),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: 0.011 + Math.random() * 0.014,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.14
+        });
+      }
+
+      if (!burstAnimId) {
+        animateBurst();
+      }
+    }
+
+    function drawMiniStar(ctx, x, y, r, rot) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (Math.PI / 2) * i;
+        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        ctx.lineTo(Math.cos(a + Math.PI / 4) * (r * 0.35), Math.sin(a + Math.PI / 4) * (r * 0.35));
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function animateBurst() {
+      const rect = burstCanvas.getBoundingClientRect();
+      bCtx.clearRect(0, 0, rect.width, rect.height);
+
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const p = burstParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.055; // gravità morbida
+        p.vx *= 0.985;
+        p.rot += p.vRot;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          burstParticles.splice(i, 1);
+          continue;
+        }
+
+        bCtx.save();
+        bCtx.globalAlpha = Math.max(0, p.alpha);
+        bCtx.fillStyle = p.color;
+        if (p.type === 'star') {
+          drawMiniStar(bCtx, p.x, p.y, p.size, p.rot);
+        } else {
+          bCtx.beginPath();
+          bCtx.arc(p.x, p.y, p.size * 0.65, 0, Math.PI * 2);
+          bCtx.fill();
+        }
+        bCtx.restore();
+      }
+
+      if (burstParticles.length > 0) {
+        burstAnimId = requestAnimationFrame(animateBurst);
+      } else {
+        burstAnimId = null;
+      }
+    }
+
+    function setDoorState(open, withEffects = false) {
+      isDoorOpen = open;
+      adventBox.classList.toggle('is-open', open);
+      adventCardReveal.classList.toggle('is-revealed', open);
+      adventCardReveal.classList.toggle('is-sealed', !open);
+      adventSealedHint.classList.toggle('hidden', open);
+
+      if (open && withEffects) {
+        triggerDoorBurst();
+        goldSweepEl.classList.remove('active');
+        void goldSweepEl.offsetWidth;
+        goldSweepEl.classList.add('active');
+      }
+    }
+
+    function toggleAdventDoor() {
+      setDoorState(!isDoorOpen, !isDoorOpen);
+    }
+
+    adventBox.addEventListener('click', toggleAdventDoor);
+    adventBox.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleAdventDoor();
+      }
+    });
+    toggleDoorBtn.addEventListener('click', toggleAdventDoor);
+
+    /*************************************************************************
+     * 8. AGGIORNAMENTO CONTO ALLA ROVESCIA E CALENDARIO AVVENTO
+     *************************************************************************/
+    function updateAdventUI(now) {
+      // Il Calendario dell'Avvento compare ESCLUSIVAMENTE nella sezione Natale
+      if (currentView !== 'event' || selectedEventId !== 'natale') {
+        adventSection.classList.add('hidden');
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        setChristmasBoost(false);
+        return;
+      }
+
+      const month = now.getMonth(); // 11 = Dicembre
+      const day = now.getDate();
+
+      if (month === 11 && day === 25) {
+        christmasDayHero.classList.remove('hidden');
+        countdownWrapper.classList.add('hidden');
+        adventSection.classList.add('hidden');
+        setChristmasBoost(true);
+      } else if (month === 11 && day >= 1 && day <= 24) {
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        adventSection.classList.remove('hidden');
+        setChristmasBoost(false);
+
+        const entry = ADVENT_DATA[day - 1];
+        adventDoorNumber.textContent = String(day);
+        adventDoorPrompt.textContent = `Clicca per aprire la casella del giorno ${day}`;
+        adventOrnament.textContent = entry.icon;
+        adventNicheDate.textContent = `${day} Dicembre`;
+        adventDayTag.textContent = `✦ Calendario dell'Avvento • Giorno ${day} di 24`;
+        adventQuoteText.textContent = `“${entry.quote}”`;
+        adventActivityText.textContent = entry.activity;
+        adventPreviewBadge.classList.toggle('hidden', simulatedDecemberDay === null);
+      } else {
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        adventSection.classList.add('hidden');
+        setChristmasBoost(false);
+      }
+
+      if (simulatedDecemberDay !== null) {
+        previewStatusNote.textContent = `Anteprima attiva: ${simulatedDecemberDay} Dicembre ${now.getFullYear()} — Clicca sulla porticina 3D per aprire o richiudere la casella.`;
+      } else {
+        previewStatusNote.textContent = `Data reale attuale: ${formatItalianDate(now)}. Dal 1 al 24 dicembre il Calendario dell’Avvento si attiva automaticamente.`;
+      }
+    }
+
+    function updateCountdown() {
+      if (currentView !== 'event') return;
+
+      const now = getEffectiveNow();
+      const ev = getSelectedEvent();
+      const target = getTargetDate(ev, now);
+
+      const displayYear = target.getFullYear();
+      activeEventTitle.textContent = ev.recurringAnnual ? `${ev.label} ${displayYear}` : ev.title;
+      activeEventDate.textContent = formatItalianDate(target);
+
+      updateAdventUI(now);
+
+      if (selectedEventId === 'natale' && now.getMonth() === 11 && now.getDate() === 25) {
+        return;
+      }
+
+      const diff = target.getTime() - now.getTime();
+      const isSameDay =
+        now.getFullYear() === target.getFullYear() &&
+        now.getMonth() === target.getMonth() &&
+        now.getDate() === target.getDate();
+
+      if (isSameDay) {
+        countdownGrid.classList.add('hidden');
+        eventReachedCard.classList.remove('hidden');
+        eventReachedText.textContent = `${ev.icon} Oggi è ${activeEventTitle.textContent}! Buona festa!`;
+      } else if (diff <= 0) {
+        countdownGrid.classList.add('hidden');
+        eventReachedCard.classList.remove('hidden');
+        eventReachedText.textContent = `${ev.icon} ${activeEventTitle.textContent} è già trascorso.`;
+      } else {
+        countdownGrid.classList.remove('hidden');
+        eventReachedCard.classList.add('hidden');
+
+        const totalSec = Math.floor(diff / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
+
+        cdDays.textContent = days >= 100 ? String(days) : pad(days);
+        cdHours.textContent = pad(hours);
+        cdMinutes.textContent = pad(minutes);
+
+        if (lastRenderedSecond !== seconds) {
+          cdSeconds.textContent = pad(seconds);
+          cdSeconds.classList.remove('tick-animate');
+          void cdSeconds.offsetWidth;
+          cdSeconds.classList.add('tick-animate');
+          lastRenderedSecond = seconds;
+        }
+      }
+    }
+
+    /*************************************************************************
+     * 9. PANNELLO ANTEPRIMA AVVENTO (1–25 DICEMBRE)
+     *************************************************************************/
+    function renderPreviewGrid() {
+      previewDaysGrid.innerHTML = '';
+      for (let d = 1; d <= 25; d++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.day = d;
+        const isXmas = d === 25;
+        btn.className = `preview-day-btn py-2 px-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+          isXmas
+            ? 'col-span-2 bg-amber-300/25 border-amber-200/70 text-amber-100 hover:bg-amber-300/40'
+            : 'bg-white/10 border-white/20 hover:bg-white/20 text-white'
+        }`;
+        btn.textContent = isXmas ? '✦ 25 Dicembre' : `${d} Dic`;
+
+        btn.addEventListener('click', () => {
+          simulatedDecemberDay = d;
+          highlightPreviewButtons();
+          setDoorState(false, false);
+          updateCountdown();
+          if (d <= 24) {
+            setTimeout(() => setDoorState(true, true), 300);
+          }
+        });
+        previewDaysGrid.appendChild(btn);
+      }
+    }
+
+    function highlightPreviewButtons() {
+      document.querySelectorAll('.preview-day-btn').forEach(btn => {
+        const d = Number(btn.dataset.day);
+        btn.classList.toggle('ring-2', simulatedDecemberDay === d);
+        btn.classList.toggle('ring-amber-200', simulatedDecemberDay === d);
+      });
+    }
+
+    togglePreviewPanelBtn.addEventListener('click', () => {
+      const hidden = adventPreviewPanel.classList.toggle('hidden');
+      togglePreviewPanelBtn.setAttribute('aria-expanded', String(!hidden));
+      previewArrow.style.transform = hidden ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    resetRealDateBtn.addEventListener('click', () => {
+      simulatedDecemberDay = null;
+      highlightPreviewButtons();
+      setDoorState(false, false);
+      updateCountdown();
+    });
+
+    /*************************************************************************
+     * 10. MOTORE ATMOSFERICO CANVAS HTML5 PER I 6 TEMI
+     *************************************************************************/
+    const canvas = document.getElementById('atmosphereCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    let canvasMode = 'christmas';
+    let christmasBoost = false;
+    let particles = [];
+    let fireworks = [];
+    let fwTick = 0;
+
+    function setChristmasBoost(boost) {
+      if (christmasBoost === boost) return;
+      christmasBoost = boost;
+      if (canvasMode === 'christmas') {
+        initAtmosphere('christmas');
+      }
+    }
+
+    function resizeAtmosphereCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initAtmosphere(canvasMode);
+    }
+
+    window.addEventListener('resize', () => {
+      if (currentView === 'event') {
+        resizeAtmosphereCanvas();
+        resizeBurstCanvas();
+      }
+    });
+
+    function setCanvasMode(mode) {
+      canvasMode = mode;
+      initAtmosphere(mode);
+    }
+
+    function initAtmosphere(mode) {
+      particles = [];
+      fireworks = [];
+      const baseCount = Math.min(135, Math.max(55, Math.floor(W / 12)));
+
+      if (mode === 'christmas') {
+        const count = christmasBoost ? Math.floor(baseCount * 1.75) : baseCount;
+        for (let i = 0; i < count; i++) {
+          const depth = Math.random();
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: 0.9 + depth * 3.6,
+            speedY: (0.45 + depth * 1.55) * (christmasBoost ? 1.3 : 1),
+            sway: Math.random() * Math.PI * 2,
+            swaySpeed: 0.008 + Math.random() * 0.018,
+            wind: (Math.random() - 0.35) * 0.35,
+            alpha: 0.25 + depth * 0.7
+          });
+        }
+      } else if (mode === 'newyear') {
+        for (let i = 0; i < 65; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H * 0.85,
+            r: Math.random() * 1.7 + 0.5,
+            alpha: Math.random() * 0.7 + 0.2,
+            twinkle: Math.random() * 0.025 + 0.008
+          });
+        }
+        launchFirework();
+      } else if (mode === 'easter') {
+        const colors = ['#fce7f3', '#fbcfe8', '#ffffff', '#fef3c7'];
+        for (let i = 0; i < Math.floor(baseCount * 0.75); i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            size: Math.random() * 6.5 + 4,
+            speedY: Math.random() * 0.9 + 0.35,
+            speedX: Math.random() * 0.7 - 0.15,
+            angle: Math.random() * Math.PI * 2,
+            spin: (Math.random() - 0.5) * 0.032,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: Math.random() * 0.55 + 0.3
+          });
+        }
+      } else if (mode === 'march') {
+        for (let i = 0; i < baseCount; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 2.2 + 0.8,
+            speedX: Math.random() * 0.55 + 0.2,
+            speedY: Math.random() * 0.5 + 0.15,
+            alpha: Math.random() * 0.6 + 0.18,
+            twinkle: Math.random() * 0.022 + 0.008
+          });
+        }
+      } else if (mode === 'may') {
+        for (let i = 0; i < baseCount; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 3.2 + 1.1,
+            speedY: -(Math.random() * 0.45 + 0.14),
+            sway: Math.random() * Math.PI * 2,
+            alpha: Math.random() * 0.65 + 0.2,
+            pulse: Math.random() * 0.02 + 0.008
+          });
+        }
+      } else if (mode === 'summer') {
+        for (let i = 0; i < Math.floor(baseCount * 0.85); i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 4.5 + 1.5,
+            speedY: -(Math.random() * 0.48 + 0.16),
+            sway: Math.random() * Math.PI * 2,
+            alpha: Math.random() * 0.45 + 0.15,
+            isShimmer: Math.random() > 0.42
+          });
+        }
+      }
+    }
+
+    function launchFirework() {
+      const cx = W * (0.15 + Math.random() * 0.7);
+      const cy = H * (0.12 + Math.random() * 0.38);
+      const colors = ['#fde68a', '#f59e0b', '#ffffff', '#93c5fd', '#fbcfe8'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const count = 46;
+
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.12;
+        const speed = 1.4 + Math.random() * 3.6;
+        fireworks.push({
+          x: cx,
+          y: cy,
+          px: cx,
+          py: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: 1,
+          decay: 0.012 + Math.random() * 0.012,
+          color
+        });
+      }
+    }
+
+    function renderAtmosphere() {
+      if (currentView === 'event') {
+        ctx.clearRect(0, 0, W, H);
+
+        if (canvasMode === 'christmas') {
+          for (const p of particles) {
+            p.sway += p.swaySpeed;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.65 + p.wind;
+            if (p.y > H + 12) { p.y = -12; p.x = Math.random() * W; }
+            if (p.x > W + 12) p.x = -12;
+            if (p.x < -12) p.x = W + 12;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 252, 245, ${p.alpha})`;
+            ctx.fill();
+          }
+        } else if (canvasMode === 'newyear') {
+          for (const p of particles) {
+            p.alpha += p.twinkle;
+            if (p.alpha > 0.9 || p.alpha < 0.15) p.twinkle *= -1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(254, 243, 199, ${Math.max(0.1, p.alpha)})`;
+            ctx.fill();
+          }
+
+          fwTick++;
+          if (fwTick > 46) {
+            launchFirework();
+            fwTick = 0;
+          }
+
+          for (let i = fireworks.length - 1; i >= 0; i--) {
+            const f = fireworks[i];
+            f.px = f.x;
+            f.py = f.y;
+            f.x += f.vx;
+            f.y += f.vy;
+            f.vy += 0.038;
+            f.vx *= 0.985;
+            f.alpha -= f.decay;
+
+            if (f.alpha <= 0) {
+              fireworks.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = f.alpha;
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = 1.7;
+            ctx.beginPath();
+            ctx.moveTo(f.px, f.py);
+            ctx.lineTo(f.x, f.y);
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else if (canvasMode === 'easter') {
+          for (const p of particles) {
+            p.y += p.speedY;
+            p.x += p.speedX + Math.sin(p.angle) * 0.45;
+            p.angle += p.spin;
+            if (p.y > H + 16) { p.y = -16; p.x = Math.random() * W; }
+            if (p.x > W + 16) p.x = -16;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size, p.size * 0.48, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        } else if (canvasMode === 'march') {
+          for (const p of particles) {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.alpha += p.twinkle;
+            if (p.alpha > 0.8 || p.alpha < 0.15) p.twinkle *= -1;
+            if (p.x > W + 10) p.x = -10;
+            if (p.y > H + 10) p.y = -10;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(226, 232, 240, ${Math.max(0.1, p.alpha)})`;
+            ctx.fill();
+          }
+        } else if (canvasMode === 'may') {
+          const sun = ctx.createRadialGradient(W * 0.84, H * 0.14, 10, W * 0.84, H * 0.14, Math.max(W, H) * 0.45);
+          sun.addColorStop(0, 'rgba(254, 215, 130, 0.24)');
+          sun.addColorStop(1, 'rgba(254, 215, 130, 0)');
+          ctx.fillStyle = sun;
+          ctx.fillRect(0, 0, W, H);
+
+          for (const p of particles) {
+            p.sway += 0.015;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.45;
+            p.alpha += p.pulse;
+            if (p.alpha > 0.85 || p.alpha < 0.15) p.pulse *= -1;
+            if (p.y < -15) { p.y = H + 15; p.x = Math.random() * W; }
+
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2.4);
+            g.addColorStop(0, `rgba(254, 240, 138, ${Math.max(0.1, p.alpha)})`);
+            g.addColorStop(1, 'rgba(254, 240, 138, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 2.4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (canvasMode === 'summer') {
+          const sun = ctx.createRadialGradient(W * 0.86, H * 0.08, 12, W * 0.86, H * 0.08, Math.max(W, H) * 0.46);
+          sun.addColorStop(0, 'rgba(254, 249, 195, 0.34)');
+          sun.addColorStop(0.5, 'rgba(250, 204, 21, 0.09)');
+          sun.addColorStop(1, 'rgba(250, 204, 21, 0)');
+          ctx.fillStyle = sun;
+          ctx.fillRect(0, 0, W, H);
+
+          for (const p of particles) {
+            p.sway += 0.016;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.4;
+            if (p.y < -15) { p.y = H + 15; p.x = Math.random() * W; }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            if (p.isShimmer) {
+              ctx.fillStyle = `rgba(254, 249, 195, ${p.alpha + 0.18})`;
+              ctx.fill();
+            } else {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha + 0.12})`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      requestAnimationFrame(renderAtmosphere);
+    }
+
+    /*************************************************************************
+     * 11. AVVIO APPLICAZIONE
+     *************************************************************************/
+    window.addEventListener('load', () => {
+      renderHomeCards();
+      renderQuickEventNav();
+      renderPreviewGrid();
+      setInterval(updateCountdown, 1000);
+      renderAtmosphere();
+    });
+  </script>
+</body>
+</html>
