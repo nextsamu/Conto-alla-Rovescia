@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attese &amp; Stagioni — Conto alla Rovescia &amp; Calendario dell'Avvento</title>
+
+  <!-- Google Fonts: Cormorant Garamond + Playfair Display (serif di lusso) & Plus Jakarta Sans (pulito e moderno) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --home-bg: #F6F4F0;
+      --home-bg-soft: #EDE9E1;
+      --home-surface: #FFFFFF;
+      --home-border: #E3DDD2;
+      --home-text: #1E1E1C;
+      --home-muted: #645F57;
+      --home-accent: #B89352;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-color: var(--home-bg);
+      color: var(--home-text);
+      transition: background-color 0.7s ease, color 0.5s ease;
+    }
+
+    .font-editorial {
+      font-family: var(--font-serif);
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       TRANSIZIONI TRA HOME NEUTRA E VISTA EVENTO
+       ============================================================ */
+    .view-section {
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-enter {
+      animation: fadeSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Card della Home Neutrale */
+    .home-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--home-border);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease, border-color 0.35s ease;
+    }
+
+    .home-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(184, 147, 82, 0.65);
+      box-shadow: 0 26px 50px -18px rgba(30, 30, 28, 0.15);
+    }
+
+    .home-card img {
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .home-card:hover img {
+      transform: scale(1.07);
+    }
+
+    /* ============================================================
+       SFONDO FOTOGRAFICO CINEMATOGRAFICO (KEN BURNS)
+       ============================================================ */
+    @keyframes kenBurns {
+      0% { transform: scale(1.0) translate3d(0, 0, 0); }
+      50% { transform: scale(1.09) translate3d(-1.1%, -0.9%, 0); }
+      100% { transform: scale(1.0) translate3d(0, 0, 0); }
+    }
+
+    .ken-burns-img {
+      animation: kenBurns 34s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    /* Vetro satinato realistico */
+    .glass-dark {
+      background: rgba(14, 16, 20, 0.48);
+      backdrop-filter: blur(22px) saturate(135%);
+      -webkit-backdrop-filter: blur(22px) saturate(135%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.32);
+    }
+
+    /* Animazione flip/glow sui secondi del conto alla rovescia */
+    @keyframes tickFlipGlow {
+      0% {
+        transform: translateY(-4px) scale(1.05);
+        text-shadow: 0 0 24px rgba(255, 232, 165, 0.75);
+        opacity: 0.72;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        text-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        opacity: 1;
+      }
+    }
+
+    .tick-animate {
+      animation: tickFlipGlow 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Scintillio oro lucido per il 25 Dicembre */
+    @keyframes goldShimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .gold-shimmer-text {
+      background: linear-gradient(
+        110deg,
+        #c89b3c 0%,
+        #fff7d6 20%,
+        #f2c94c 42%,
+        #ffffff 50%,
+        #d4af37 68%,
+        #a67c2e 100%
+      );
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: goldShimmer 4s linear infinite;
+      filter: drop-shadow(0 10px 30px rgba(212, 175, 55, 0.5));
+    }
+
+    /* ============================================================
+       SCENOGRAFIA NATALIZIA ANIMATA (ALBERI + LUCINE + PRESEPE + COMETA)
+       ============================================================ */
+    @keyframes twinkleWarm {
+      0%, 100% { opacity: 0.32; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.25); }
+    }
+
+    @keyframes twinkleColor {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes cometPulse {
+      0%, 100% { opacity: 0.78; transform: translate(0, 0) scale(1); }
+      50% { opacity: 1; transform: translate(3px, -2px) scale(1.06); }
+    }
+
+    @keyframes mangerGlow {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 0.92; }
+    }
+
+    .tree-bulb-a { animation: twinkleWarm 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    .tree-bulb-b { animation: twinkleWarm 2.7s ease-in-out 0.6s infinite; transform-box: fill-box; transform-origin: center; }
+    .tree-bulb-c { animation: twinkleColor 1.9s ease-in-out 1.1s infinite; }
+    .tree-bulb-d { animation: twinkleColor 3.1s ease-in-out 0.3s infinite; }
+    .comet-anim { animation: cometPulse 3.6s ease-in-out infinite; }
+    .manger-glow { animation: mangerGlow 3.2s ease-in-out infinite; }
+
+    /* Fiocchi di neve CSS locali davanti e dietro il palco Avvento */
+    @keyframes stageSnowFall {
+      0% { transform: translateY(-10%) translateX(0); opacity: 0; }
+      15% { opacity: 0.85; }
+      85% { opacity: 0.85; }
+      100% { transform: translateY(115%) translateX(18px); opacity: 0; }
+    }
+
+    .stage-snow-dot {
+      position: absolute;
+      top: -8px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, #ffffff 0%, rgba(255, 255, 255, 0.2) 75%, transparent 100%);
+      pointer-events: none;
+      animation: stageSnowFall linear infinite;
+    }
+
+    /* ============================================================
+       CALENDARIO DELL'AVVENTO 3D GIGANTE (380x440px SU DESKTOP)
+       ============================================================ */
+    .advent-stage {
+      perspective: 1600px;
+      position: relative;
+    }
+
+    .advent-box-shell {
+      position: relative;
+      width: 380px;
+      height: 440px;
+      max-width: 100%;
+      padding: 15px;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #351d13 0%, #1c0d08 55%, #0e0604 100%);
+      box-shadow:
+        0 34px 75px rgba(0, 0, 0, 0.68),
+        inset 0 2px 4px rgba(255, 224, 150, 0.28),
+        inset 0 -3px 9px rgba(0, 0, 0, 0.8),
+        0 0 0 1.5px rgba(212, 175, 55, 0.5);
+      transform-style: preserve-3d;
+    }
+
+    @media (max-width: 440px) {
+      .advent-box-shell {
+        width: 305px;
+        height: 365px;
+      }
+    }
+
+    @keyframes gentleInvite {
+      0%, 100% { box-shadow: 0 34px 75px rgba(0,0,0,0.68), 0 0 24px rgba(242, 201, 76, 0.18), 0 0 0 1.5px rgba(212, 175, 55, 0.5); }
+      50% { box-shadow: 0 34px 75px rgba(0,0,0,0.68), 0 0 42px rgba(242, 201, 76, 0.38), 0 0 0 1.5px rgba(245, 215, 130, 0.8); }
+    }
+
+    .advent-box-shell:not(.is-open) {
+      animation: gentleInvite 3.4s ease-in-out infinite;
+    }
+
+    /* Nicchia interna con foto natalizia nitida + raggi dorati */
+    .advent-niche {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 42%, #4a2810 0%, #241008 60%, #0f0604 100%);
+      box-shadow:
+        inset 0 12px 32px rgba(0, 0, 0, 0.85),
+        inset 0 0 44px rgba(255, 195, 85, 0.28);
+      border: 1.5px solid rgba(235, 198, 118, 0.42);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .advent-niche-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.12);
+      opacity: 0.45;
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, opacity 0.8s ease 0.12s;
+    }
+
+    .advent-box-shell.is-open .advent-niche-photo {
+      transform: scale(1.0);
+      opacity: 1;
+    }
+
+    /* Raggi volumetrici rotanti all'apertura */
+    @keyframes spinRays {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .advent-light-rays {
+      position: absolute;
+      inset: -45%;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 226, 135, 0.24) 0deg 14deg,
+        transparent 14deg 30deg
+      );
+      opacity: 0;
+      transition: opacity 0.9s ease 0.12s;
+      animation: spinRays 24s linear infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      z-index: 2;
+    }
+
+    .advent-box-shell.is-open .advent-light-rays {
+      opacity: 0.85;
+    }
+
+    .advent-niche-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(12, 8, 6, 0.12) 0%, rgba(12, 8, 6, 0.25) 55%, rgba(10, 6, 4, 0.88) 100%);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .advent-niche-caption {
+      position: relative;
+      z-index: 4;
+      padding: 18px 20px;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.75s ease 0.32s, transform 0.75s ease 0.32s;
+    }
+
+    .advent-box-shell.is-open .advent-niche-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Cerniere metalliche in ottone sul lato sinistro */
+    .brass-hinge {
+      position: absolute;
+      left: 7px;
+      width: 13px;
+      height: 50px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6e4f12 0%, #f7df8a 38%, #c5982e 72%, #5e410d 100%);
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.68), inset 0 1px 1px rgba(255, 255, 255, 0.55);
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    .brass-hinge.top { top: 68px; }
+    .brass-hinge.bottom { bottom: 68px; }
+
+    /* Porticina 3D che ruota sui cardini a sinistra */
+    .advent-door-pivot {
+      position: absolute;
+      inset: 15px;
+      border-radius: 20px;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.25s cubic-bezier(0.22, 1.12, 0.32, 1);
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    .advent-box-shell.is-open .advent-door-pivot {
+      transform: rotateY(-134deg);
+    }
+
+    /* Fronte della porticina con cornice fotografica artistica + velluto bordeaux + lamina oro */
+    .advent-door-front {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: linear-gradient(150deg, #6e161f 0%, #420a11 55%, #21070a 100%);
+      border: 2px solid rgba(232, 194, 108, 0.85);
+      box-shadow:
+        inset 0 0 0 9px rgba(15, 4, 6, 0.35),
+        inset 0 0 0 11px rgba(232, 194, 108, 0.45),
+        0 16px 34px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 22px 20px;
+      overflow: hidden;
+      transition: filter 0.35s ease;
+    }
+
+    .advent-door-pivot:hover .advent-door-front {
+      filter: brightness(1.07);
+    }
+
+    /* Foto natalizia artistica di anteprima incorniciata sul fronte della porticina */
+    .door-front-photo-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.34;
+      filter: saturate(1.15) contrast(1.05);
+      transition: transform 0.7s ease, opacity 0.4s ease;
+    }
+
+    .advent-door-pivot:hover .door-front-photo-bg {
+      transform: scale(1.05);
+      opacity: 0.44;
+    }
+
+    .door-front-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 42%, rgba(76, 14, 22, 0.45) 0%, rgba(35, 7, 12, 0.84) 85%);
+      pointer-events: none;
+    }
+
+    /* Angoli decorativi in oro */
+    .gold-corner {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-color: rgba(242, 207, 125, 0.82);
+      pointer-events: none;
+      z-index: 4;
+    }
+    .gold-corner.tl { top: 18px; left: 18px; border-top: 2px solid; border-left: 2px solid; border-top-left-radius: 4px; }
+    .gold-corner.tr { top: 18px; right: 18px; border-top: 2px solid; border-right: 2px solid; border-top-right-radius: 4px; }
+    .gold-corner.bl { bottom: 18px; left: 18px; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 4px; }
+    .gold-corner.br { bottom: 18px; right: 18px; border-bottom: 2px solid; border-right: 2px solid; border-bottom-right-radius: 4px; }
+
+    /* Spessore laterale 3D del bordo destro */
+    .advent-door-thickness {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      right: -9px;
+      width: 11px;
+      background: linear-gradient(180deg, #9e7422 0%, #f5d882 50%, #7d5914 100%);
+      transform: rotateY(90deg);
+      transform-origin: left center;
+      border-radius: 2px;
+    }
+
+    /* Retro interno della porticina */
+    .advent-door-back {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: rotateY(180deg);
+      background: linear-gradient(145deg, #2d1316 0%, #150709 100%);
+      border: 1.5px solid rgba(226, 187, 102, 0.45);
+      box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.72);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Nastro dorato e sigillo in ceralacca rossa con numero del giorno */
+    .satin-ribbon {
+      position: absolute;
+      right: 28px;
+      top: 0;
+      bottom: 0;
+      width: 15px;
+      background: linear-gradient(90deg, #9c7420 0%, #f8df95 48%, #9c7420 100%);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+      z-index: 5;
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.45s ease;
+    }
+
+    .advent-box-shell.is-open .satin-ribbon {
+      transform: scaleY(0.15);
+      opacity: 0;
+    }
+
+    .wax-seal {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 35% 30%, #dc2626 0%, #991b1b 55%, #5c0b0b 100%);
+      border: 2px solid rgba(248, 215, 130, 0.78);
+      box-shadow:
+        0 6px 15px rgba(0, 0, 0, 0.62),
+        inset 0 2px 5px rgba(255, 200, 180, 0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fef3c7;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1.2rem;
+      z-index: 6;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+    }
+
+    .advent-box-shell.is-open .wax-seal {
+      transform: translateY(-50%) scale(1.45) rotate(28deg);
+      opacity: 0;
+    }
+
+    /* Canvas dedicato all'esplosione fisica di scintille dalla porticina */
+    #doorBurstCanvas {
+      position: absolute;
+      inset: -95px;
+      width: calc(100% + 190px);
+      height: calc(100% + 190px);
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Pannello vetro satinato caldo affiancato a destra */
+    .advent-card-reveal {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    .advent-card-reveal.is-sealed {
+      opacity: 0.84;
+      transform: translateX(6px);
+    }
+
+    .advent-card-reveal.is-revealed {
+      opacity: 1;
+      transform: translateX(0);
+      border-color: rgba(242, 207, 125, 0.58);
+      box-shadow: 0 26px 58px rgba(0, 0, 0, 0.45), 0 0 40px rgba(242, 207, 125, 0.16);
+    }
+
+    @keyframes sweepGold {
+      0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+      35% { opacity: 0.65; }
+      100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+
+    .gold-sweep {
+      position: absolute;
+      inset: 0;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255, 226, 145, 0.28), transparent);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .gold-sweep.active {
+      animation: sweepGold 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .sealed-blur {
+      filter: blur(5px);
+      user-select: none;
+      transition: filter 0.75s ease 0.15s, opacity 0.75s ease 0.15s;
+    }
+
+    .advent-card-reveal.is-revealed .sealed-blur {
+      filter: blur(0);
+      user-select: auto;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-300/30">
+
+  <!-- =======================================================================
+       1. HOME PAGE (COLORE NEUTRO CALDO ED ELEGANTE)
+       ======================================================================= -->
+  <div id="homeView" class="view-section min-h-screen w-full relative overflow-hidden" style="background: radial-gradient(circle at 15% 0%, #FAF8F4 0%, #F6F4F0 52%, #EDE9E1 100%);">
+    <!-- Sfumature luminose discrete sullo sfondo neutro -->
+    <div class="pointer-events-none absolute -top-28 -right-28 w-[420px] h-[420px] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(184, 147, 82, 0.18) 0%, transparent 70%);"></div>
+    <div class="pointer-events-none absolute -bottom-28 -left-28 w-[420px] h-[420px] rounded-full opacity-35" style="background: radial-gradient(circle, rgba(184, 147, 82, 0.14) 0%, transparent 70%);"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 lg:px-10 py-14 sm:py-20 flex flex-col gap-12 sm:gap-16">
+      <!-- Intestazione e Descrizione Poetica -->
+      <header class="text-center max-w-2xl mx-auto space-y-5 animate-enter">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-[11px] uppercase tracking-[0.26em] font-semibold" style="border-color: rgba(184, 147, 82, 0.4); color: #B89352; background: rgba(255,255,255,0.72);">
+          <span>✦</span>
+          <span>Collezione di Momenti Speciali</span>
+        </div>
+
+        <h1 class="font-editorial text-5xl sm:text-7xl font-semibold tracking-tight leading-[1.03]" style="color: #1E1E1C;">
+          Attese &amp; Stagioni
+        </h1>
+
+        <div class="w-16 h-[1.5px] mx-auto" style="background: linear-gradient(90deg, transparent, #B89352, transparent);"></div>
+
+        <p class="text-sm sm:text-base leading-relaxed font-normal max-w-xl mx-auto" style="color: #5C5750;">
+          Un rifugio digitale che accompagna il conto alla rovescia verso i momenti più belli dell’anno. Scegli una data qui sotto per entrare nella sua atmosfera fotografica e animata e, nella sezione <strong class="font-semibold" style="color: #1E1E1C;">Natale</strong>, lasciati sorprendere dal nostro grande Calendario dell’Avvento 3D con alberi illuminati, presepe e mete incantate.
+        </p>
+      </header>
+
+      <!-- Griglia Responsiva delle 7 Card Fotografiche -->
+      <section aria-label="Scegli un evento">
+        <div class="flex items-center justify-between mb-6 px-1">
+          <h2 class="font-editorial text-2xl sm:text-3xl font-semibold" style="color: #1E1E1C;">
+            Scegli il tuo prossimo appuntamento
+          </h2>
+          <span class="text-xs uppercase tracking-[0.2em] font-semibold" style="color: #B89352;">
+            7 Atmosfere
+          </span>
+        </div>
+
+        <div id="homeCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+          <!-- 7 Card generate dinamicamente via JS -->
+        </div>
+      </section>
+
+      <!-- Footer discreto -->
+      <footer class="text-center pt-4 pb-2 text-xs tracking-wide" style="color: #847E75;">
+        Attese &amp; Stagioni • Ogni appuntamento cambia luce, fotografia e animazione in tempo reale
+      </footer>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       2. VISTA EVENTO (FOTOGRAFIA + CANVAS + COUNTDOWN + AVVENTO SCENOGRAFICO)
+       ======================================================================= -->
+  <div id="eventView" class="view-section view-hidden min-h-screen w-full relative text-white flex flex-col justify-between overflow-hidden">
+
+    <!-- Sfondo Fotografico Realistico + Effetto Ken Burns + Fallback CSS -->
+    <div id="eventBgFallback" class="fixed inset-0 z-0 transition-all duration-1000"></div>
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      <img
+        id="eventBgPhoto"
+        src=""
+        alt=""
+        class="w-full h-full object-cover ken-burns-img opacity-0 transition-opacity duration-1000"
+      />
+      <div id="eventBgOverlay" class="absolute inset-0 transition-all duration-1000"></div>
+    </div>
+
+    <!-- Canvas HTML5 per le animazioni dedicate ai 7 temi -->
+    <canvas id="atmosphereCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+    <!-- Barra Superiore Glassmorphism (Torna alla Home + Cambio Rapido 7 Eventi) -->
+    <header class="relative z-20 w-full border-b border-white/15 bg-black/28 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <button
+          id="backToHomeBtn"
+          type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/20 transition cursor-pointer"
+        >
+          <span>←</span>
+          <span>Torna alla Home</span>
+        </button>
+
+        <nav id="quickEventNav" aria-label="Cambio rapido evento" class="flex items-center gap-1.5 overflow-x-auto max-w-full pb-0.5">
+          <!-- Pillole dei 7 eventi generate via JS -->
+        </nav>
+      </div>
+    </header>
+
+    <!-- Contenuto Principale Evento -->
+    <main class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 flex-grow flex flex-col items-center gap-9 sm:gap-12">
+
+      <!-- Intestazione Evento -->
+      <div class="text-center space-y-2.5 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium tracking-[0.18em] uppercase bg-black/30 border border-white/25 backdrop-blur-md">
+          <span id="activeEventIcon">❄</span>
+          <span id="activeThemeName">Inverno &amp; Luci Calde</span>
+        </div>
+        <h1 id="activeEventTitle" class="font-editorial text-5xl sm:text-7xl font-semibold tracking-tight drop-shadow-lg leading-none">
+          Natale 2026
+        </h1>
+        <p id="activeEventDate" class="text-xs sm:text-sm uppercase tracking-[0.24em] text-white/85 font-medium">
+          Venerdì 25 Dicembre 2026
+        </p>
+      </div>
+
+      <!-- GRANDE SCHERMATA CELEBRATIVA 25 DICEMBRE (Solo nella sezione Natale il 25 Dicembre) -->
+      <section id="christmasDayHero" class="hidden w-full max-w-5xl glass-dark rounded-[34px] p-10 sm:p-16 text-center border-amber-200/45 relative overflow-hidden">
+        <p class="text-xs sm:text-sm uppercase tracking-[0.34em] text-amber-200 font-semibold mb-4">
+          ✦ 25 Dicembre • Giorno di Festa ✦
+        </p>
+        <h2 class="font-editorial text-6xl sm:text-8xl md:text-9xl font-bold tracking-wide gold-shimmer-text leading-none">
+          Buon Natale!
+        </h2>
+        <p class="mt-6 text-base sm:text-xl font-light text-white/92 max-w-2xl mx-auto leading-relaxed">
+          Che questa giornata sia piena di calore, luce, abbracci sinceri e piccoli istanti di meraviglia da custodire nel cuore.
+        </p>
+      </section>
+
+      <!-- CONTO ALLA ROVESCIA GRANDE ED ELEGANTE -->
+      <section id="countdownWrapper" class="w-full max-w-4xl">
+        <div id="countdownGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6">
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdDays" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Giorni</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdHours" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Ore</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdMinutes" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Minuti</span>
+          </div>
+          <div class="glass-dark rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center justify-center">
+            <span id="cdSeconds" class="font-editorial tabular-nums text-5xl sm:text-7xl font-semibold leading-none drop-shadow">00</span>
+            <span class="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/75 font-medium">Secondi</span>
+          </div>
+        </div>
+
+        <div id="eventReachedCard" class="hidden glass-dark rounded-3xl p-8 text-center">
+          <p id="eventReachedText" class="font-editorial text-3xl sm:text-4xl font-semibold"></p>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           3. CALENDARIO DELL'AVVENTO 3D GIGANTE + SCENOGRAFIA NATALIZIA
+              (VISIBILE ESCLUSIVAMENTE NELLA SEZIONE NATALE)
+           =================================================================== -->
+      <section id="adventSection" class="hidden w-full max-w-[1220px]">
+        <div class="glass-dark rounded-[36px] p-6 sm:p-10 lg:p-12 border border-amber-200/35 relative overflow-hidden">
+
+          <!-- NEVE ANIMATA LOCALE DIETRO IL PALCO -->
+          <div id="stageSnowBack" class="pointer-events-none absolute inset-0 overflow-hidden z-0" aria-hidden="true"></div>
+
+          <!-- SCENOGRAFIA NATALIZIA INTEGRATA (ALBERI CON LUCINE + PRESEPE + STELLA COMETA) -->
+          <div class="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-90" aria-hidden="true">
+            <!-- Albero di Natale sinistro con fili di lucine intermittenti -->
+            <svg class="hidden md:block absolute -left-8 bottom-0 w-44 h-72 opacity-80" viewBox="0 0 180 300" fill="none">
+              <defs>
+                <linearGradient id="treeGradL" x1="90" y1="20" x2="90" y2="275" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#1e4d36" />
+                  <stop offset="65%" stop-color="#113122" />
+                  <stop offset="100%" stop-color="#081a11" />
+                </linearGradient>
+              </defs>
+              <rect x="78" y="252" width="24" height="44" rx="4" fill="#3b2013" />
+              <polygon points="90,20 45,105 135,105" fill="url(#treeGradL)" />
+              <polygon points="90,72 30,175 150,175" fill="url(#treeGradL)" />
+              <polygon points="90,132 14,258 166,258" fill="url(#treeGradL)" />
+              <!-- Fili luminosi -->
+              <path d="M62 92 Q90 104 118 92" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <path d="M44 156 Q90 174 136 156" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <path d="M26 226 Q90 248 154 226" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <!-- Stella puntale -->
+              <polygon points="90,6 94,16 105,16 96,22 99,32 90,26 81,32 84,22 75,16 86,16" fill="#fde68a" class="tree-bulb-a" />
+              <!-- Lucine intermittenti calde e colorate -->
+              <circle cx="78" cy="86" r="3.6" fill="#fef08a" class="tree-bulb-a" />
+              <circle cx="104" cy="94" r="3.2" fill="#fca5a5" class="tree-bulb-c" />
+              <circle cx="62" cy="148" r="3.8" fill="#fde047" class="tree-bulb-b" />
+              <circle cx="94" cy="162" r="3.5" fill="#93c5fd" class="tree-bulb-d" />
+              <circle cx="122" cy="150" r="3.6" fill="#fef08a" class="tree-bulb-a" />
+              <circle cx="48" cy="218" r="4" fill="#fbbf24" class="tree-bulb-b" />
+              <circle cx="82" cy="232" r="3.6" fill="#f87171" class="tree-bulb-c" />
+              <circle cx="115" cy="224" r="3.8" fill="#fef08a" class="tree-bulb-a" />
+              <circle cx="140" cy="240" r="3.4" fill="#fde68a" class="tree-bulb-d" />
+            </svg>
+
+            <!-- Albero di Natale destro con fili di lucine intermittenti -->
+            <svg class="hidden md:block absolute -right-8 bottom-0 w-44 h-72 opacity-80" viewBox="0 0 180 300" fill="none">
+              <defs>
+                <linearGradient id="treeGradR" x1="90" y1="20" x2="90" y2="275" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#1d4b35" />
+                  <stop offset="65%" stop-color="#102f20" />
+                  <stop offset="100%" stop-color="#071810" />
+                </linearGradient>
+              </defs>
+              <rect x="78" y="252" width="24" height="44" rx="4" fill="#3b2013" />
+              <polygon points="90,22 44,106 136,106" fill="url(#treeGradR)" />
+              <polygon points="90,74 28,176 152,176" fill="url(#treeGradR)" />
+              <polygon points="90,134 12,258 168,258" fill="url(#treeGradR)" />
+              <path d="M60 94 Q90 106 120 94" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <path d="M42 158 Q90 176 138 158" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <path d="M24 228 Q90 250 156 228" stroke="#fde68a" stroke-width="1.2" stroke-opacity="0.45" fill="none" />
+              <polygon points="90,8 94,18 105,18 96,24 99,34 90,28 81,34 84,24 75,18 86,18" fill="#fef08a" class="tree-bulb-b" />
+              <circle cx="80" cy="88" r="3.4" fill="#f87171" class="tree-bulb-c" />
+              <circle cx="106" cy="94" r="3.6" fill="#fef08a" class="tree-bulb-a" />
+              <circle cx="58" cy="152" r="3.5" fill="#fde047" class="tree-bulb-d" />
+              <circle cx="92" cy="166" r="3.8" fill="#fef08a" class="tree-bulb-b" />
+              <circle cx="124" cy="154" r="3.4" fill="#93c5fd" class="tree-bulb-c" />
+              <circle cx="46" cy="222" r="3.8" fill="#fef08a" class="tree-bulb-a" />
+              <circle cx="88" cy="236" r="3.8" fill="#fbbf24" class="tree-bulb-b" />
+              <circle cx="122" cy="226" r="3.5" fill="#fca5a5" class="tree-bulb-d" />
+            </svg>
+          </div>
+
+          <!-- INTESTAZIONE SCENOGRAFICA DEL CALENDARIO + PRESEPE ILLUMINATO CON STELLA COMETA -->
+          <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 pb-6 mb-8 border-b border-amber-200/20">
+            <div class="text-center md:text-left">
+              <p class="text-[11px] uppercase tracking-[0.28em] text-amber-200/85 font-semibold">
+                ✦ Tradizione &amp; Meraviglia ✦
+              </p>
+              <h2 class="font-editorial text-3xl sm:text-4xl font-semibold text-amber-50 mt-0.5">
+                Il Grande Calendario dell’Avvento
+              </h2>
+            </div>
+
+            <!-- PRESEPE ILLUMINATO STILIZZATO CON CAPANNA, SACRA FAMIGLIA E STELLA COMETA ANIMATA -->
+            <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/35 border border-amber-200/25">
+              <svg class="w-40 sm:w-48 h-20 overflow-visible" viewBox="0 0 220 92" fill="none" aria-label="Presepe illuminato con stella cometa">
+                <defs>
+                  <radialGradient id="stableWarm" cx="50%" cy="68%" r="48%">
+                    <stop offset="0%" stop-color="#fde68a" stop-opacity="0.85" />
+                    <stop offset="55%" stop-color="#d97706" stop-opacity="0.32" />
+                    <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+                  </radialGradient>
+                  <linearGradient id="cometTail" x1="30" y1="18" x2="112" y2="18" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#fde68a" stop-opacity="0" />
+                    <stop offset="65%" stop-color="#fde68a" stop-opacity="0.55" />
+                    <stop offset="100%" stop-color="#fffbeb" stop-opacity="0.95" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Stella cometa con scia luminosa animata -->
+                <g class="comet-anim">
+                  <path d="M22 26 Q68 12 110 18 Q70 22 28 32 Z" fill="url(#cometTail)" />
+                  <polygon points="112,6 115,15 124,18 115,21 112,30 109,21 100,18 109,15" fill="#fffbeb" />
+                </g>
+
+                <!-- Alone caldo interno alla capanna -->
+                <ellipse cx="110" cy="68" rx="56" ry="26" fill="url(#stableWarm)" class="manger-glow" />
+
+                <!-- Capanna in legno caldo -->
+                <path d="M46 84 L46 52 L110 26 L174 52 L174 84" stroke="#d4a359" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(48, 24, 12, 0.55)" />
+                <line x1="38" y1="56" x2="110" y2="25" stroke="#f5d38c" stroke-width="2" stroke-linecap="round" />
+                <line x1="182" y1="56" x2="110" y2="25" stroke="#f5d38c" stroke-width="2" stroke-linecap="round" />
+                <line x1="42" y1="84" x2="178" y2="84" stroke="#b89352" stroke-width="2" stroke-linecap="round" />
+
+                <!-- San Giuseppe (sinistra) -->
+                <circle cx="84" cy="56" r="5" fill="#fef3c7" />
+                <path d="M74 83 C75 67 80 62 84 62 C88 62 93 67 94 83 Z" fill="#e5c17d" />
+                <line x1="72" y1="52" x2="72" y2="83" stroke="#d4a359" stroke-width="1.6" stroke-linecap="round" />
+
+                <!-- Maria (destra) -->
+                <circle cx="136" cy="58" r="4.8" fill="#fef3c7" />
+                <path d="M126 83 C127 68 131 64 136 64 C141 64 145 68 146 83 Z" fill="#f3d8a0" />
+
+                <!-- Culla & Gesù Bambino al centro -->
+                <path d="M100 77 L120 77 L116 83 L104 83 Z" fill="#9a6b32" />
+                <circle cx="110" cy="73.5" r="3.4" fill="#fffbeb" />
+                <circle cx="110" cy="73.5" r="7" stroke="#fde68a" stroke-width="0.9" stroke-opacity="0.7" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- LAYOUT AFFIANCATO A DUE COLONNE: SINISTRA PORTICINA 3D GIGANTE | DESTRA FRASE + ATTIVITÀ + META -->
+          <div class="relative z-10 flex flex-col lg:flex-row items-center lg:items-stretch gap-10 lg:gap-12">
+
+            <!-- COLONNA SINISTRA: PORTICINA 3D GIGANTE CON IMMAGINE SU OGNI GIORNO -->
+            <div class="flex flex-col items-center justify-center shrink-0">
+              <div class="advent-stage">
+                <!-- Canvas esplosione scintille dorate -->
+                <canvas id="doorBurstCanvas"></canvas>
+
+                <div
+                  id="adventBox"
+                  class="advent-box-shell"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Apri la casella del Calendario dell'Avvento"
+                >
+                  <!-- Cerniere in ottone -->
+                  <div class="brass-hinge top" aria-hidden="true"></div>
+                  <div class="brass-hinge bottom" aria-hidden="true"></div>
+
+                  <!-- INTERNO NICCHIA: Immagine natalizia nitida del giorno + raggi dorati + badge -->
+                  <div class="advent-niche">
+                    <img
+                      id="adventNichePhoto"
+                      src=""
+                      alt="Immagine natalizia del giorno"
+                      class="advent-niche-photo"
+                    />
+                    <div class="advent-light-rays" aria-hidden="true"></div>
+                    <div class="advent-niche-gradient" aria-hidden="true"></div>
+
+                    <div class="advent-niche-caption">
+                      <span id="adventNicheBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold bg-amber-300/25 border border-amber-200/50 text-amber-100 backdrop-blur-md">
+                        ✦ 1 Dicembre
+                      </span>
+                      <p id="adventNichePlace" class="font-editorial text-2xl sm:text-3xl font-semibold text-white mt-2 drop-shadow">
+                        Bolzano
+                      </p>
+                      <p id="adventNicheRegion" class="text-xs text-amber-100/90 tracking-wide">
+                        Trentino-Alto Adige
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- PORTICINA 3D ANTERIORE CON IMMAGINE ARTISTICA DI ANTEPRIMA + NUMERO + SIGILLO -->
+                  <div id="adventDoorPivot" class="advent-door-pivot">
+                    <div class="advent-door-thickness" aria-hidden="true"></div>
+
+                    <div class="advent-door-front">
+                      <!-- Anteprima fotografica natalizia del giorno incorniciata sul fronte -->
+                      <img
+                        id="adventDoorFrontPhoto"
+                        src=""
+                        alt=""
+                        class="door-front-photo-bg"
+                      />
+                      <div class="door-front-vignette" aria-hidden="true"></div>
+
+                      <div class="gold-corner tl"></div>
+                      <div class="gold-corner tr"></div>
+                      <div class="gold-corner bl"></div>
+                      <div class="gold-corner br"></div>
+
+                      <div class="satin-ribbon" aria-hidden="true"></div>
+                      <div id="adventWaxSeal" class="wax-seal" aria-hidden="true">1</div>
+
+                      <!-- Testata superiore della porticina -->
+                      <div class="relative z-10 text-center">
+                        <span class="text-[11px] uppercase tracking-[0.3em] text-amber-200/95 font-semibold">
+                          Avvento • Dicembre
+                        </span>
+                      </div>
+
+                      <!-- Grande numero del giorno con miniatura fotografica in rilievo -->
+                      <div class="relative z-10 flex flex-col items-center">
+                        <span id="adventDoorNumber" class="font-editorial text-8xl sm:text-[7.2rem] font-bold text-amber-100 leading-none drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
+                          1
+                        </span>
+                        <span id="adventDoorSubPlace" class="mt-2 text-xs uppercase tracking-[0.22em] text-amber-200/90 font-medium">
+                          Bolzano
+                        </span>
+                      </div>
+
+                      <!-- Invito cliccabile -->
+                      <span id="adventDoorPrompt" class="relative z-10 px-4 py-2 rounded-full bg-black/45 border border-amber-200/45 text-[11px] uppercase tracking-[0.16em] text-amber-100 font-medium text-center backdrop-blur-sm">
+                        Apri la casella del giorno 1
+                      </span>
+                    </div>
+
+                    <!-- Retro della porticina -->
+                    <div class="advent-door-back">
+                      <span class="font-editorial text-5xl text-amber-200/40">✦</span>
+                      <span class="mt-2 text-[11px] uppercase tracking-[0.28em] text-amber-200/45">
+                        Buon Avvento
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                id="toggleDoorBtn"
+                type="button"
+                class="mt-5 px-5 py-2 rounded-full text-xs uppercase tracking-[0.2em] text-amber-100 hover:text-white bg-amber-400/15 hover:bg-amber-400/25 border border-amber-200/35 transition cursor-pointer font-semibold"
+              >
+                Apri la casella del giorno
+              </button>
+            </div>
+
+            <!-- COLONNA DESTRA (AFFIANCATA ALLA PORTICINA): 1. Frase | 2. Cosa fare oggi | 3. Meta Natalizia -->
+            <div
+              id="adventCardReveal"
+              class="advent-card-reveal is-sealed flex-1 rounded-3xl p-7 sm:p-9 bg-gradient-to-br from-[#251613]/85 via-[#1a1110]/88 to-[#120b0a]/92 border border-amber-200/28 flex flex-col justify-center text-left w-full"
+            >
+              <div id="goldSweepEl" class="gold-sweep" aria-hidden="true"></div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <span id="adventDayTag" class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] font-semibold text-amber-200">
+                  ✦ Calendario dell'Avvento • Giorno 1 di 24
+                </span>
+                <span id="adventPreviewBadge" class="hidden text-[11px] px-3 py-0.5 rounded-full bg-amber-300/20 border border-amber-200/45 text-amber-100 font-medium">
+                  Modalità Anteprima
+                </span>
+              </div>
+
+              <p id="adventSealedHint" class="text-xs uppercase tracking-[0.18em] text-amber-200/80 mb-4 font-medium">
+                🔒 Clicca sulla porticina a sinistra per svelare immagine, frase, attività e meta natalizia di oggi
+              </p>
+
+              <!-- 3 SEZIONI CURATE CHE SI SVELANO NITIDAMENTE ALL'APERTURA -->
+              <div class="sealed-blur space-y-5">
+                <!-- 1. La Frase Natalizia del Giorno -->
+                <div>
+                  <p class="text-[10px] uppercase tracking-[0.26em] text-amber-200/80 font-semibold mb-1.5">
+                    ✦ Pensiero del Giorno
+                  </p>
+                  <blockquote id="adventQuoteText" class="font-editorial italic text-2xl sm:text-3xl leading-snug font-medium text-amber-50">
+                    “Dicembre è arrivato: lascia che la luce delle piccole cose scaldi ogni giornata.”
+                  </blockquote>
+                </div>
+
+                <!-- 2. Cosa Fare Oggi -->
+                <div class="rounded-2xl p-4 sm:p-5 bg-black/35 border border-amber-200/22">
+                  <p class="text-[11px] uppercase tracking-[0.24em] text-amber-200 font-semibold mb-1.5">
+                    🎁 Cosa fare oggi
+                  </p>
+                  <p id="adventActivityText" class="text-sm sm:text-[15px] font-light leading-relaxed text-white/95">
+                    Crea una playlist con le tue canzoni natalizie preferite e accendi una candela profumata.
+                  </p>
+                </div>
+
+                <!-- 3. Meta Natalizia Consigliata -->
+                <div class="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-transparent border border-amber-200/35">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                    <p class="text-[11px] uppercase tracking-[0.24em] text-amber-200 font-semibold">
+                      📍 Meta Natalizia Consigliata
+                    </p>
+                    <span id="adventDestRegion" class="text-[11px] px-2.5 py-0.5 rounded-full bg-black/35 border border-amber-200/30 text-amber-100 font-medium">
+                      Trentino-Alto Adige
+                    </span>
+                  </div>
+                  <h3 id="adventDestName" class="font-editorial text-2xl sm:text-3xl font-semibold text-white leading-tight">
+                    Bolzano
+                  </h3>
+                  <p id="adventDestDesc" class="mt-1.5 text-sm font-light leading-relaxed text-amber-50/90">
+                    I celebri mercatini di Piazza Walther, tra casette in legno profumate di vin brulé, spezie e montagne innevate sullo sfondo.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- NEVE ANIMATA LEGGERA DAVANTI AL PALCO -->
+          <div id="stageSnowFront" class="pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- BARRA DISCRETA ANTEPRIMA AVVENTO (VISIBILE SOLO NELLA SEZIONE NATALE) -->
+      <section id="adventPreviewSection" class="hidden w-full max-w-[1220px]">
+        <div class="flex flex-col items-center gap-3">
+          <button
+            id="togglePreviewPanelBtn"
+            type="button"
+            class="glass-dark px-5 py-2.5 rounded-full text-xs tracking-wide font-medium text-amber-100/95 hover:text-white transition flex items-center gap-2.5 cursor-pointer"
+            aria-expanded="false"
+            aria-controls="adventPreviewPanel"
+          >
+            <span>✦</span>
+            <span>Anteprima Avvento (1–25 Dicembre)</span>
+            <span id="previewArrow" class="transition-transform duration-300">▾</span>
+          </button>
+
+          <div id="adventPreviewPanel" class="hidden w-full glass-dark rounded-3xl p-5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="font-editorial text-2xl font-semibold text-amber-100">Esplora e simula ogni giorno di Dicembre</h3>
+                <p class="text-xs text-white/75">Clicca un numero dal 1 al 24 per vedere l’immagine, l’apertura 3D e la meta natalizia di quel giorno, oppure seleziona il 25 Dicembre.</p>
+              </div>
+              <button
+                id="resetRealDateBtn"
+                type="button"
+                class="px-4 py-2 rounded-full text-xs font-medium bg-white/15 hover:bg-white/25 border border-white/25 transition cursor-pointer"
+              >
+                ↺ Torna alla Data Reale
+              </button>
+            </div>
+
+            <div id="previewDaysGrid" class="grid grid-cols-5 sm:grid-cols-9 gap-2">
+              <!-- Pulsanti 1..25 generati via JS -->
+            </div>
+
+            <p id="previewStatusNote" class="mt-3.5 text-xs text-white/75 text-center"></p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    /*************************************************************************
+     * 1. CONFIGURAZIONE DEI 7 EVENTI CON FOTOGRAFIE REALISTICHE E TEMI
+     *************************************************************************/
+    const EVENTS = [
+      {
+        id: 'natale',
+        label: 'Natale',
+        title: 'Natale 2026',
+        icon: '❄',
+        themeName: 'Inverno & Luci Calde',
+        tagline: 'Neve soffice su più livelli, presepe illuminato e grande Calendario dell’Avvento 3D.',
+        year: 2026,
+        month: 11, // Dicembre (0-indexed)
+        day: 25,
+        recurringAnnual: true,
+        canvasMode: 'christmas',
+        photoUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'radial-gradient(circle at 20% 15%, #3d141a 0%, #162920 50%, #09130f 100%)',
+        overlay: 'linear-gradient(180deg, rgba(10, 14, 13, 0.56) 0%, rgba(12, 18, 16, 0.44) 48%, rgba(8, 12, 11, 0.8) 100%)'
+      },
+      {
+        id: 'capodanno',
+        label: 'Capodanno 2027',
+        title: 'Capodanno 2027',
+        icon: '✦',
+        themeName: 'Notte di Gala & Fuochi',
+        tagline: 'Oro, blu profondo e fuochi d’artificio realistici per accogliere il nuovo anno.',
+        year: 2027,
+        month: 0, // Gennaio
+        day: 1,
+        recurringAnnual: false,
+        canvasMode: 'newyear',
+        photoUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'radial-gradient(circle at 50% 0%, #1e2a4a 0%, #0b1124 58%, #040711 100%)',
+        overlay: 'linear-gradient(180deg, rgba(6, 10, 24, 0.58) 0%, rgba(7, 12, 28, 0.45) 50%, rgba(4, 7, 18, 0.8) 100%)'
+      },
+      {
+        id: 'marzo2',
+        label: '2 Marzo 2027',
+        title: '2 Marzo 2027',
+        icon: '◈',
+        themeName: 'Risveglio Alpino Cristallino',
+        tagline: 'Aria tersa d’alta quota, cristalli luminosi e le prime albe di fine inverno.',
+        year: 2027,
+        month: 2, // Marzo
+        day: 2,
+        recurringAnnual: false,
+        canvasMode: 'march',
+        photoUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(155deg, #1b2a3b 0%, #334e68 52%, #627d98 100%)',
+        overlay: 'linear-gradient(180deg, rgba(14, 24, 38, 0.52) 0%, rgba(18, 30, 46, 0.38) 50%, rgba(10, 18, 30, 0.72) 100%)'
+      },
+      {
+        id: 'pasqua',
+        label: 'Pasqua',
+        title: 'Pasqua 2027',
+        icon: '✿',
+        themeName: 'Primavera & Ciliegi in Fiore',
+        tagline: 'Petali rosa e bianchi che danzano nel vento sotto una luce primaverile.',
+        year: 2027,
+        month: 2, // Marzo
+        day: 28,
+        recurringAnnual: false,
+        canvasMode: 'easter',
+        photoUrl: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(145deg, #4b5d52 0%, #7d6272 52%, #b08488 100%)',
+        overlay: 'linear-gradient(180deg, rgba(28, 22, 30, 0.48) 0%, rgba(35, 24, 34, 0.36) 50%, rgba(24, 18, 26, 0.68) 100%)'
+      },
+      {
+        id: 'maggio31',
+        label: '31 Maggio',
+        title: '31 Maggio 2027',
+        icon: '☼',
+        themeName: 'Tarda Primavera & Tramonto',
+        tagline: 'Polline dorato, campi luminosi e serate miti che annunciano l’estate.',
+        year: 2027,
+        month: 4, // Maggio
+        day: 31,
+        recurringAnnual: true,
+        canvasMode: 'may',
+        photoUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(145deg, #1f3c2d 0%, #6b4728 52%, #bd712f 100%)',
+        overlay: 'linear-gradient(180deg, rgba(28, 22, 14, 0.46) 0%, rgba(36, 26, 14, 0.34) 50%, rgba(20, 15, 10, 0.72) 100%)'
+      },
+      {
+        id: 'luglio1',
+        label: '1 Luglio',
+        title: '1 Luglio 2027',
+        icon: '☀',
+        themeName: 'Estate & Mare Mediterraneo',
+        tagline: 'Acqua turchese, riflessi solari e leggerezza di piena estate.',
+        year: 2027,
+        month: 6, // Luglio
+        day: 1,
+        recurringAnnual: true,
+        canvasMode: 'summer',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(155deg, #0a3556 0%, #0e6b85 52%, #c9973e 100%)',
+        overlay: 'linear-gradient(180deg, rgba(8, 30, 48, 0.45) 0%, rgba(10, 42, 62, 0.32) 50%, rgba(6, 24, 38, 0.68) 100%)'
+      },
+      {
+        id: 'ferragosto',
+        label: 'Ferragosto',
+        title: 'Ferragosto 2027',
+        icon: '✧',
+        themeName: 'Notte d’Agosto sul Mare',
+        tagline: 'Spiaggia al tramonto, lanterne calde nel cielo e riflessi dorati sull’acqua.',
+        year: 2027,
+        month: 7, // Agosto (0-indexed)
+        day: 15,
+        recurringAnnual: true,
+        canvasMode: 'ferragosto',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85',
+        thumbUrl: 'https://images.unsplash.com/photo-1495954484758-af4972989f38?auto=format&fit=crop&w=800&q=80',
+        fallbackBg: 'linear-gradient(160deg, #1b1433 0%, #6b2d47 45%, #c96a3a 80%, #1c192b 100%)',
+        overlay: 'linear-gradient(180deg, rgba(16, 12, 34, 0.56) 0%, rgba(62, 26, 40, 0.42) 50%, rgba(12, 10, 26, 0.82) 100%)'
+      }
+    ];
+
+    // Immagine tramonto sul mare dedicata per Ferragosto vista evento
+    EVENTS[6].photoUrl = 'https://images.unsplash.com/photo-1495954484758-af4972989f38?auto=format&fit=crop&w=1920&q=85';
+
+    /*************************************************************************
+     * 2. 24 GIORNI DEL CALENDARIO DELL'AVVENTO
+     *    Ogni giorno: Immagine natalizia reale diversa + Frase + Attività + Meta
+     *************************************************************************/
+    const ADVENT_DATA = [
+      {
+        day: 1,
+        image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=900&q=80',
+        quote: 'Dicembre è arrivato: lascia che la luce delle piccole cose scaldi ogni giornata.',
+        activity: 'Crea una playlist con le tue canzoni natalizie preferite e accendi una candela profumata.',
+        destName: 'Bolzano',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'I mercatini storici di Piazza Walther, tra casette in legno, profumo di cannella e il profilo delle Dolomiti innevate.'
+      },
+      {
+        day: 2,
+        image: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=900&q=80',
+        quote: 'Il Natale inizia nel momento in cui scegliamo di dedicare tempo autentico a chi amiamo.',
+        activity: 'Scrivi la lista delle persone a cui vuoi riservare un pensiero o un augurio speciale.',
+        destName: 'Merano',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Eleganti casette natalizie lungo la passeggiata del Passirio, luci calde e relax nelle celebri terme invernali.'
+      },
+      {
+        day: 3,
+        image: 'https://images.unsplash.com/photo-1513297887119-d46091b24bfa?auto=format&fit=crop&w=900&q=80',
+        quote: 'Una luce calda alla finestra regala un sorriso anche a chi passa soltanto per caso.',
+        activity: 'Sistema una fila di lucine calde in stanza o sul balcone per creare subito atmosfera.',
+        destName: 'Bressanone',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Piazza Duomo vestita a festa, lo spettacolo di luci nel Palazzo Vescovile e il prezioso Museo dei Presepi.'
+      },
+      {
+        day: 4,
+        image: 'https://images.unsplash.com/photo-1545622783-b3e021430fee?auto=format&fit=crop&w=900&q=80',
+        quote: 'La gentilezza è il dono più prezioso che puoi offrire senza spendere nulla.',
+        activity: 'Invia un messaggio sincero e inaspettato a un amico o parente che non senti da tempo.',
+        destName: 'Napoli — Via San Gregorio Armeno',
+        destRegion: 'Campania',
+        destDesc: 'La celebre strada dei maestri presepiai, dove botteghe artigiane creano capolavori di terracotta tra musica e calore.'
+      },
+      {
+        day: 5,
+        image: 'https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?auto=format&fit=crop&w=900&q=80',
+        quote: 'Il profumo di cannella e agrumi trasforma un pomeriggio freddo in un ricordo felice.',
+        activity: 'Prepara una cioccolata calda o una tisana speziata e gustala lontano dallo smartphone.',
+        destName: 'Gubbio',
+        destRegion: 'Umbria',
+        destDesc: 'Celebre per l’Albero di Natale più grande del mondo, disegnato con centinaia di luci lungo le pendici del Monte Ingino.'
+      },
+      {
+        day: 6,
+        image: 'https://images.unsplash.com/photo-1511268011861-691ed210aae8?auto=format&fit=crop&w=900&q=80',
+        quote: 'Ogni decorazione custodisce una storia e il calore degli inverni passati.',
+        activity: 'Realizza una piccola decorazione natalizia fatta a mano con carta, spago o rametti di pino.',
+        destName: 'Brunico',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Autentica atmosfera alpina nel cuore della Val Pusteria, tra vicoli medievali, corni alpini e neve fresca.'
+      },
+      {
+        day: 7,
+        image: 'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=900&q=80',
+        quote: 'La vera festa nasce dalla gratitudine per ciò che già illumina la nostra vita.',
+        activity: 'Annota su un foglio tre momenti belli di quest’anno per cui ti senti grato.',
+        destName: 'Cortina d’Ampezzo',
+        destRegion: 'Veneto',
+        destDesc: 'La Regina delle Dolomiti innevate, con Corso Italia illuminato a festa, chalet di legno e panorami mozzafiato.'
+      },
+      {
+        day: 8,
+        image: 'https://images.unsplash.com/photo-1544273677-c433136021d4?auto=format&fit=crop&w=900&q=80',
+        quote: 'È il giorno perfetto per vestire la casa di colori, stelle e allegria.',
+        activity: 'Addobba l’albero di Natale o il presepe insieme alla famiglia o agli amici.',
+        destName: 'Govone',
+        destRegion: 'Piemonte',
+        destDesc: 'Il Magico Paese di Natale attorno al Castello Reale sabaudo, tra spettacoli fiabeschi e mercatini nelle Langhe.'
+      },
+      {
+        day: 9,
+        image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=900&q=80',
+        quote: 'Un film di Natale sotto una coperta calda è il miglior rifugio dal freddo.',
+        activity: 'Organizza una serata cinema con un grande classico natalizio e qualcosa di buono da sgranocchiare.',
+        destName: 'Vipiteno',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Dominata dalla maestosa Torre delle Dodici, risuona con il carillon delle campane di Natale tra fiocchi di neve.'
+      },
+      {
+        day: 10,
+        image: 'https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?auto=format&fit=crop&w=900&q=80',
+        quote: 'Un piccolo gesto gentile accende una scintilla che sa moltiplicarsi.',
+        activity: 'Fai una cortesia inattesa: lascia un bigliettino positivo o offri un caffè a qualcuno.',
+        destName: 'Arezzo',
+        destRegion: 'Toscana',
+        destDesc: 'La Città del Natale con il grande villaggio tirolese in Piazza Grande, installazioni luminose e artigianato.'
+      },
+      {
+        day: 11,
+        image: 'https://images.unsplash.com/photo-1481391032119-d89fee407e44?auto=format&fit=crop&w=900&q=80',
+        quote: 'Il profumo dei biscotti appena sfornati è la colonna sonora più dolce dell’inverno.',
+        activity: 'Prepara dei biscotti di pasta frolla o speziati e condividili con chi ti sta vicino.',
+        destName: 'San Candido',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Un Natale intimo e fiabesco ai piedi delle Dolomiti di Sesto, con stradine innevate e tradizione autentica.'
+      },
+      {
+        day: 12,
+        image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=900&q=80',
+        quote: 'Camminare sotto le luminarie di dicembre fa tornare tutti un po’ bambini.',
+        activity: 'Fai una passeggiata serale per ammirare le luci della città o visita un mercatino.',
+        destName: 'Greccio',
+        destRegion: 'Lazio',
+        destDesc: 'Il borgo arroccato dove San Francesco diede vita al primo Presepe della storia nel 1223, carico di spiritualità.'
+      },
+      {
+        day: 13,
+        image: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=900&q=80',
+        quote: 'Anche nelle giornate più corte, la luce più forte resta quella che portiamo dentro.',
+        activity: 'Riordina un angolo di casa e metti da parte qualcosa in ottimo stato da donare.',
+        destName: 'Rovereto',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Il Natale dei Popoli, dove piazze storiche si animano di artigianato, luci artistiche e messaggi di pace.'
+      },
+      {
+        day: 14,
+        image: 'https://images.unsplash.com/photo-1517299321609-52687d1bc55a?auto=format&fit=crop&w=900&q=80',
+        quote: 'I ricordi più belli non si impacchettano, si rivivono insieme.',
+        activity: 'Sfoglia vecchie foto dei Natali passati e racconta i momenti più divertenti.',
+        destName: 'Aosta',
+        destRegion: 'Valle d’Aosta',
+        destDesc: 'Il suggestivo Marché Vert Noël allestito tra le antiche mura del Teatro Romano, circondato dalle Alpi.'
+      },
+      {
+        day: 15,
+        image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=900&q=80',
+        quote: 'Mancano solo dieci giorni: rallenta il passo e assapora la bellezza dell’attesa.',
+        activity: 'Inizia a confezionare i regali con cura, usando nastri e biglietti scritti a mano.',
+        destName: 'Matera',
+        destRegion: 'Basilicata',
+        destDesc: 'Uno scenario unico al mondo: il Presepe Vivente nei Sassi illuminati da migliaia di luci dorate al crepuscolo.'
+      },
+      {
+        day: 16,
+        image: 'https://images.unsplash.com/photo-1477601263568-180e2c6d046e?auto=format&fit=crop&w=900&q=80',
+        quote: 'Le parole scritte col cuore durano molto più a lungo di qualsiasi oggetto.',
+        activity: 'Scrivi almeno tre biglietti d’auguri personalizzati a mano per le persone più care.',
+        destName: 'Livigno',
+        destRegion: 'Lombardia',
+        destDesc: 'Il “Piccolo Tibet” italiano, un villaggio alpino di chalet in legno avvolto da neve soffice e piste scintillanti.'
+      },
+      {
+        day: 17,
+        image: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=900&q=80',
+        quote: 'La musica delle feste ha il potere silenzioso di unire generazioni diverse.',
+        activity: 'Metti in sottofondo i tuoi brani preferiti di Natale mentre cucini o sistemi casa.',
+        destName: 'Locorotondo',
+        destRegion: 'Puglia',
+        destDesc: 'Un gioiello della Valle d’Itria i cui vicoli bianchi e cummerse si trasformano in un incantevole villaggio luminoso.'
+      },
+      {
+        day: 18,
+        image: 'https://images.unsplash.com/photo-1513297887119-d46091b24bfa?auto=format&fit=crop&w=900&q=80',
+        quote: 'Condividere un gioco attorno a un tavolo significa regalarsi risate vere.',
+        activity: 'Organizza una serata a carte, tombola o con un gioco da tavolo in compagnia.',
+        destName: 'Candelara',
+        destRegion: 'Marche',
+        destDesc: 'Il celebre borgo delle candele: la luce elettrica si spegne e migliaia di fiammelle illuminano la sera.'
+      },
+      {
+        day: 19,
+        image: 'https://images.unsplash.com/photo-1511268011861-691ed210aae8?auto=format&fit=crop&w=900&q=80',
+        quote: 'Ogni fiocco di neve è unico, proprio come il tempo che dedichi al tuo benessere.',
+        activity: 'Concediti un’ora di pieno relax: leggi qualche pagina, ascolta musica o riposa senza fretta.',
+        destName: 'Grazzano Visconti',
+        destRegion: 'Emilia-Romagna',
+        destDesc: 'Un borgo neomedievale da fiaba con castello, torri illuminate, pista sul ghiaccio e mercatini incantati.'
+      },
+      {
+        day: 20,
+        image: 'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=900&q=80',
+        quote: 'La tavola delle feste è il luogo in cui gli abbracci diventano profumi e sapori.',
+        activity: 'Aiuta a scegliere il menù delle feste o prepara la lista per un dolce speciale.',
+        destName: 'Courmayeur',
+        destRegion: 'Valle d’Aosta',
+        destDesc: 'Eleganza montana ai piedi del Monte Bianco, con il grande albero acceso, camini caldi e serate stellate.'
+      },
+      {
+        day: 21,
+        image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=900&q=80',
+        quote: 'Con il solstizio d’inverno la luce ricomincia a crescere, giorno dopo giorno.',
+        activity: 'Fai un brindisi simbolico all’inverno e scrivi un desiderio per il nuovo anno.',
+        destName: 'Trento',
+        destRegion: 'Trentino-Alto Adige',
+        destDesc: 'Piazza Fiera e Piazza Cesare Battisti accolgono uno dei mercatini più amati d’Italia, tra mura antiche e dolci tipici.'
+      },
+      {
+        day: 22,
+        image: 'https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?auto=format&fit=crop&w=900&q=80',
+        quote: 'Non serve la perfezione per un Natale meraviglioso, basta la sincerità.',
+        activity: 'Chiama una persona lontana o un nonno per fare una chiacchierata senza guardare l’orologio.',
+        destName: 'Colmar',
+        destRegion: 'Alsazia, Francia',
+        destDesc: 'Case a graticcio riflesse nei canali della Petite Venise, ghirlande ovunque e sei mercatini di puro incanto.'
+      },
+      {
+        day: 23,
+        image: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=900&q=80',
+        quote: 'L’aria profuma di attesa: l’incanto della Vigilia è ormai a un passo.',
+        activity: 'Sistema gli ultimi dettagli con calma, prepara i pacchetti sotto l’albero e goditi la serata.',
+        destName: 'Vienna',
+        destRegion: 'Austria',
+        destDesc: 'Il grandioso Christkindlmarkt davanti al Municipio gotico, tra valzer, luci imperiali e profumo di mandorle tostate.'
+      },
+      {
+        day: 24,
+        image: 'https://images.unsplash.com/photo-1517299321609-52687d1bc55a?auto=format&fit=crop&w=900&q=80',
+        quote: 'È la Vigilia di Natale: apri il cuore alla meraviglia, alla pace e agli abbracci più veri.',
+        activity: 'Lascia andare ogni pensiero, goditi la cena della Vigilia e scambia gli auguri a mezzanotte!',
+        destName: 'Rovaniemi',
+        destRegion: 'Lapponia, Finlandia',
+        destDesc: 'Il Villaggio di Babbo Natale al Circolo Polare Artico, tra foreste artiche innevate, renne e aurore boreali.'
+      }
+    ];
+
+    /*************************************************************************
+     * 3. STATO APPLICAZIONE E RIFERIMENTI DOM
+     *************************************************************************/
+    let currentView = 'home'; // 'home' | 'event'
+    let selectedEventId = 'natale';
+    let simulatedDecemberDay = null; // null = data reale; 1..25 = anteprima
+    let isDoorOpen = false;
+    let lastRenderedSecond = null;
+
+    const homeView = document.getElementById('homeView');
+    const eventView = document.getElementById('eventView');
+    const homeCardsGrid = document.getElementById('homeCardsGrid');
+    const backToHomeBtn = document.getElementById('backToHomeBtn');
+    const quickEventNav = document.getElementById('quickEventNav');
+
+    const eventBgFallback = document.getElementById('eventBgFallback');
+    const eventBgPhoto = document.getElementById('eventBgPhoto');
+    const eventBgOverlay = document.getElementById('eventBgOverlay');
+
+    const activeEventIcon = document.getElementById('activeEventIcon');
+    const activeThemeName = document.getElementById('activeThemeName');
+    const activeEventTitle = document.getElementById('activeEventTitle');
+    const activeEventDate = document.getElementById('activeEventDate');
+
+    const cdDays = document.getElementById('cdDays');
+    const cdHours = document.getElementById('cdHours');
+    const cdMinutes = document.getElementById('cdMinutes');
+    const cdSeconds = document.getElementById('cdSeconds');
+    const countdownWrapper = document.getElementById('countdownWrapper');
+    const countdownGrid = document.getElementById('countdownGrid');
+    const eventReachedCard = document.getElementById('eventReachedCard');
+    const eventReachedText = document.getElementById('eventReachedText');
+    const christmasDayHero = document.getElementById('christmasDayHero');
+
+    const adventSection = document.getElementById('adventSection');
+    const adventBox = document.getElementById('adventBox');
+    const adventDoorNumber = document.getElementById('adventDoorNumber');
+    const adventDoorSubPlace = document.getElementById('adventDoorSubPlace');
+    const adventDoorPrompt = document.getElementById('adventDoorPrompt');
+    const adventWaxSeal = document.getElementById('adventWaxSeal');
+    const adventDoorFrontPhoto = document.getElementById('adventDoorFrontPhoto');
+    const adventNichePhoto = document.getElementById('adventNichePhoto');
+    const adventNicheBadge = document.getElementById('adventNicheBadge');
+    const adventNichePlace = document.getElementById('adventNichePlace');
+    const adventNicheRegion = document.getElementById('adventNicheRegion');
+
+    const adventCardReveal = document.getElementById('adventCardReveal');
+    const adventSealedHint = document.getElementById('adventSealedHint');
+    const goldSweepEl = document.getElementById('goldSweepEl');
+    const adventDayTag = document.getElementById('adventDayTag');
+    const adventPreviewBadge = document.getElementById('adventPreviewBadge');
+    const adventQuoteText = document.getElementById('adventQuoteText');
+    const adventActivityText = document.getElementById('adventActivityText');
+    const adventDestName = document.getElementById('adventDestName');
+    const adventDestRegion = document.getElementById('adventDestRegion');
+    const adventDestDesc = document.getElementById('adventDestDesc');
+    const toggleDoorBtn = document.getElementById('toggleDoorBtn');
+
+    const adventPreviewSection = document.getElementById('adventPreviewSection');
+    const togglePreviewPanelBtn = document.getElementById('togglePreviewPanelBtn');
+    const adventPreviewPanel = document.getElementById('adventPreviewPanel');
+    const previewArrow = document.getElementById('previewArrow');
+    const previewDaysGrid = document.getElementById('previewDaysGrid');
+    const resetRealDateBtn = document.getElementById('resetRealDateBtn');
+    const previewStatusNote = document.getElementById('previewStatusNote');
+
+    /*************************************************************************
+     * 4. UTILITÀ DATE
+     *************************************************************************/
+    function getEffectiveNow() {
+      const realNow = new Date();
+      if (simulatedDecemberDay !== null && currentView === 'event' && selectedEventId === 'natale') {
+        return new Date(
+          realNow.getFullYear(),
+          11,
+          simulatedDecemberDay,
+          realNow.getHours(),
+          realNow.getMinutes(),
+          realNow.getSeconds()
+        );
+      }
+      return realNow;
+    }
+
+    function getTargetDate(ev, now) {
+      let targetYear = ev.year;
+      let target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+      if (ev.recurringAnnual) {
+        const endOfDay = new Date(targetYear, ev.month, ev.day, 23, 59, 59);
+        if (now > endOfDay) {
+          targetYear = now.getFullYear();
+          target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+          if (now > new Date(targetYear, ev.month, ev.day, 23, 59, 59)) {
+            targetYear += 1;
+            target = new Date(targetYear, ev.month, ev.day, 0, 0, 0);
+          }
+        }
+      }
+      return target;
+    }
+
+    function formatItalianDate(date) {
+      const str = new Intl.DateTimeFormat('it-IT', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function formatShortDate(date) {
+      return new Intl.DateTimeFormat('it-IT', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+    }
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function getSelectedEvent() {
+      return EVENTS.find(e => e.id === selectedEventId) || EVENTS[0];
+    }
+
+    /*************************************************************************
+     * 5. HOME NEUTRA: COSTRUZIONE DELLE 7 CARD FOTOGRAFICHE
+     *************************************************************************/
+    function renderHomeCards() {
+      const now = new Date();
+      homeCardsGrid.innerHTML = '';
+
+      EVENTS.forEach(ev => {
+        const target = getTargetDate(ev, now);
+        const diffMs = target.getTime() - now.getTime();
+        const daysLeft = Math.max(0, Math.ceil(diffMs / 86400000));
+        const displayTitle = ev.recurringAnnual ? `${ev.label} ${target.getFullYear()}` : ev.title;
+        const daysLabel = daysLeft === 0 ? 'Oggi' : (daysLeft === 1 ? 'Manca 1 giorno' : `Mancano ${daysLeft} giorni`);
+
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'home-card group rounded-3xl overflow-hidden text-left flex flex-col cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B89352]';
+
+        card.innerHTML = `
+          <div class="relative h-48 w-full overflow-hidden" style="background: ${ev.fallbackBg};">
+            <img
+              src="${ev.thumbUrl}"
+              alt="${displayTitle}"
+              loading="lazy"
+              onerror="this.style.display='none'"
+              class="w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/58 via-black/10 to-transparent"></div>
+            <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-medium tracking-wide bg-white/92 text-[#1E1E1C] shadow-sm">
+              ${ev.icon} ${ev.themeName}
+            </div>
+            <div class="absolute bottom-3.5 right-3.5 px-3 py-1 rounded-full text-xs font-semibold bg-black/55 backdrop-blur-md text-white border border-white/20">
+              ${daysLabel}
+            </div>
+          </div>
+          <div class="p-6 flex flex-col flex-grow justify-between gap-4">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.2em] font-semibold mb-1.5" style="color: #B89352;">
+                ${formatShortDate(target)}
+              </p>
+              <h3 class="font-editorial text-3xl font-semibold leading-tight" style="color: #1E1E1C;">
+                ${displayTitle}
+              </h3>
+              <p class="mt-2 text-xs sm:text-sm leading-relaxed" style="color: #645F57;">
+                ${ev.tagline}
+              </p>
+            </div>
+            <div class="pt-3 border-t flex items-center justify-between text-xs font-semibold tracking-wide" style="border-color: #EAE4D9; color: #1E1E1C;">
+              <span>Entra nell’atmosfera</span>
+              <span class="transition-transform duration-300 group-hover:translate-x-1.5" style="color: #B89352;">→</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => openEventView(ev.id));
+        homeCardsGrid.appendChild(card);
+      });
+    }
+
+    function renderQuickEventNav() {
+      quickEventNav.innerHTML = '';
+      EVENTS.forEach(ev => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.quickId = ev.id;
+        btn.className = 'quick-nav-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer';
+        btn.textContent = `${ev.icon} ${ev.label}`;
+        btn.addEventListener('click', () => selectEvent(ev.id));
+        quickEventNav.appendChild(btn);
+      });
+    }
+
+    function updateQuickNavActive() {
+      document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+        const active = btn.dataset.quickId === selectedEventId;
+        btn.className = `quick-nav-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer ${
+          active
+            ? 'bg-white text-[#1E1E1C] border-white shadow-md'
+            : 'bg-white/10 text-white/85 border-white/20 hover:bg-white/20'
+        }`;
+      });
+    }
+
+    /*************************************************************************
+     * 6. NAVIGAZIONE HOME <-> VISTA EVENTO
+     *************************************************************************/
+    function openEventView(eventId) {
+      currentView = 'event';
+      homeView.classList.add('view-hidden');
+      eventView.classList.remove('view-hidden');
+      eventView.classList.add('animate-enter');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      resizeAtmosphereCanvas();
+      selectEvent(eventId);
+    }
+
+    function returnToHome() {
+      currentView = 'home';
+      eventView.classList.add('view-hidden');
+      homeView.classList.remove('view-hidden');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      renderHomeCards();
+    }
+
+    backToHomeBtn.addEventListener('click', returnToHome);
+
+    function selectEvent(eventId) {
+      selectedEventId = eventId;
+      const ev = getSelectedEvent();
+      updateQuickNavActive();
+
+      eventBgFallback.style.background = ev.fallbackBg;
+      eventBgOverlay.style.background = ev.overlay;
+      eventBgPhoto.style.opacity = '0';
+
+      const loader = new Image();
+      loader.onload = () => {
+        if (selectedEventId === ev.id) {
+          eventBgPhoto.src = ev.photoUrl;
+          eventBgPhoto.alt = ev.title;
+          eventBgPhoto.style.opacity = '1';
+        }
+      };
+      loader.onerror = () => {
+        eventBgPhoto.style.opacity = '0';
+      };
+      loader.src = ev.photoUrl;
+
+      activeEventIcon.textContent = ev.icon;
+      activeThemeName.textContent = ev.themeName;
+
+      // Il Calendario dell'Avvento e la sua barra anteprima esistono SOLO in Natale
+      if (ev.id === 'natale') {
+        adventPreviewSection.classList.remove('hidden');
+      } else {
+        adventPreviewSection.classList.add('hidden');
+        adventSection.classList.add('hidden');
+        christmasDayHero.classList.add('hidden');
+      }
+
+      setCanvasMode(ev.canvasMode);
+      updateCountdown();
+    }
+
+    /*************************************************************************
+     * 7. NEVE LOCALE DAVANTI/DIETRO IL PALCO AVVENTO + MOTORE SCINTILLE PORTICINA
+     *************************************************************************/
+    function buildStageSnow() {
+      const back = document.getElementById('stageSnowBack');
+      const front = document.getElementById('stageSnowFront');
+      if (!back || !front) return;
+      back.innerHTML = '';
+      front.innerHTML = '';
+
+      for (let i = 0; i < 24; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'stage-snow-dot';
+        const size = 2 + Math.random() * 4;
+        dot.style.width = `${size}px`;
+        dot.style.height = `${size}px`;
+        dot.style.left = `${Math.random() * 100}%`;
+        dot.style.animationDuration = `${7 + Math.random() * 8}s`;
+        dot.style.animationDelay = `${-Math.random() * 12}s`;
+        dot.style.opacity = String(0.3 + Math.random() * 0.45);
+        back.appendChild(dot);
+      }
+
+      for (let i = 0; i < 12; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'stage-snow-dot';
+        const size = 3 + Math.random() * 4.5;
+        dot.style.width = `${size}px`;
+        dot.style.height = `${size}px`;
+        dot.style.left = `${Math.random() * 100}%`;
+        dot.style.animationDuration = `${5 + Math.random() * 6}s`;
+        dot.style.animationDelay = `${-Math.random() * 10}s`;
+        dot.style.opacity = String(0.35 + Math.random() * 0.4);
+        front.appendChild(dot);
+      }
+    }
+
+    const burstCanvas = document.getElementById('doorBurstCanvas');
+    const bCtx = burstCanvas.getContext('2d');
+    let burstParticles = [];
+    let burstAnimId = null;
+
+    function resizeBurstCanvas() {
+      const rect = burstCanvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      burstCanvas.width = rect.width * dpr;
+      burstCanvas.height = rect.height * dpr;
+      bCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function triggerDoorBurst() {
+      resizeBurstCanvas();
+      const rect = burstCanvas.getBoundingClientRect();
+      const cx = rect.width * 0.52;
+      const cy = rect.height * 0.5;
+      const colors = ['#fffbeb', '#fde68a', '#f59e0b', '#fbbf24', '#ffffff'];
+
+      for (let i = 0; i < 72; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.8 + Math.random() * 6.2;
+        const typeRand = Math.random();
+        burstParticles.push({
+          x: cx + (Math.random() - 0.5) * 40,
+          y: cy + (Math.random() - 0.5) * 70,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.5,
+          size: typeRand > 0.7 ? (4.5 + Math.random() * 4.5) : (2 + Math.random() * 3),
+          type: typeRand > 0.7 ? 'star' : 'spark',
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: 0.011 + Math.random() * 0.013,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.14
+        });
+      }
+
+      if (!burstAnimId) {
+        animateBurst();
+      }
+    }
+
+    function drawMiniStar(ctx, x, y, r, rot) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (Math.PI / 2) * i;
+        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        ctx.lineTo(Math.cos(a + Math.PI / 4) * (r * 0.35), Math.sin(a + Math.PI / 4) * (r * 0.35));
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function animateBurst() {
+      const rect = burstCanvas.getBoundingClientRect();
+      bCtx.clearRect(0, 0, rect.width, rect.height);
+
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const p = burstParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.055;
+        p.vx *= 0.985;
+        p.rot += p.vRot;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          burstParticles.splice(i, 1);
+          continue;
+        }
+
+        bCtx.save();
+        bCtx.globalAlpha = Math.max(0, p.alpha);
+        bCtx.fillStyle = p.color;
+        if (p.type === 'star') {
+          drawMiniStar(bCtx, p.x, p.y, p.size, p.rot);
+        } else {
+          bCtx.beginPath();
+          bCtx.arc(p.x, p.y, p.size * 0.65, 0, Math.PI * 2);
+          bCtx.fill();
+        }
+        bCtx.restore();
+      }
+
+      if (burstParticles.length > 0) {
+        burstAnimId = requestAnimationFrame(animateBurst);
+      } else {
+        burstAnimId = null;
+      }
+    }
+
+    function setDoorState(open, withEffects = false) {
+      isDoorOpen = open;
+      adventBox.classList.toggle('is-open', open);
+      adventCardReveal.classList.toggle('is-revealed', open);
+      adventCardReveal.classList.toggle('is-sealed', !open);
+      adventSealedHint.classList.toggle('hidden', open);
+      toggleDoorBtn.textContent = open ? 'Richiudi la porticina' : 'Apri la casella del giorno';
+
+      if (open && withEffects) {
+        triggerDoorBurst();
+        goldSweepEl.classList.remove('active');
+        void goldSweepEl.offsetWidth;
+        goldSweepEl.classList.add('active');
+      }
+    }
+
+    function toggleAdventDoor() {
+      setDoorState(!isDoorOpen, !isDoorOpen);
+    }
+
+    adventBox.addEventListener('click', toggleAdventDoor);
+    adventBox.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleAdventDoor();
+      }
+    });
+    toggleDoorBtn.addEventListener('click', toggleAdventDoor);
+
+    // Fallback elegante se una foto Avvento non carica
+    function applySafeAdventPhoto(imgEl, url, altText) {
+      imgEl.style.display = 'block';
+      imgEl.onerror = () => {
+        imgEl.style.display = 'none';
+      };
+      imgEl.src = url;
+      imgEl.alt = altText;
+    }
+
+    /*************************************************************************
+     * 8. AGGIORNAMENTO CONTO ALLA ROVESCIA E CALENDARIO AVVENTO
+     *************************************************************************/
+    function updateAdventUI(now) {
+      if (currentView !== 'event' || selectedEventId !== 'natale') {
+        adventSection.classList.add('hidden');
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        setChristmasBoost(false);
+        return;
+      }
+
+      const month = now.getMonth(); // 11 = Dicembre
+      const day = now.getDate();
+
+      if (month === 11 && day === 25) {
+        christmasDayHero.classList.remove('hidden');
+        countdownWrapper.classList.add('hidden');
+        adventSection.classList.add('hidden');
+        setChristmasBoost(true);
+      } else if (month === 11 && day >= 1 && day <= 24) {
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        adventSection.classList.remove('hidden');
+        setChristmasBoost(false);
+
+        const entry = ADVENT_DATA[day - 1];
+        adventDoorNumber.textContent = String(day);
+        adventWaxSeal.textContent = String(day);
+        adventDoorSubPlace.textContent = entry.destName.split('—')[0].trim();
+        adventDoorPrompt.textContent = `Apri la casella del giorno ${day}`;
+
+        applySafeAdventPhoto(adventDoorFrontPhoto, entry.image, `Anteprima ${day} Dicembre - ${entry.destName}`);
+        applySafeAdventPhoto(adventNichePhoto, entry.image, `${day} Dicembre - ${entry.destName}`);
+
+        adventNicheBadge.textContent = `✦ ${day} Dicembre`;
+        adventNichePlace.textContent = entry.destName;
+        adventNicheRegion.textContent = entry.destRegion;
+
+        adventDayTag.textContent = `✦ Calendario dell'Avvento • Giorno ${day} di 24`;
+        adventQuoteText.textContent = `“${entry.quote}”`;
+        adventActivityText.textContent = entry.activity;
+        adventDestName.textContent = entry.destName;
+        adventDestRegion.textContent = entry.destRegion;
+        adventDestDesc.textContent = entry.destDesc;
+        adventPreviewBadge.classList.toggle('hidden', simulatedDecemberDay === null);
+      } else {
+        christmasDayHero.classList.add('hidden');
+        countdownWrapper.classList.remove('hidden');
+        adventSection.classList.add('hidden');
+        setChristmasBoost(false);
+      }
+
+      if (simulatedDecemberDay !== null) {
+        previewStatusNote.textContent = `Anteprima attiva: ${simulatedDecemberDay} Dicembre ${now.getFullYear()} — Clicca sulla porticina 3D per aprire o richiudere la casella.`;
+      } else {
+        previewStatusNote.textContent = `Data reale attuale: ${formatItalianDate(now)}. Dal 1 al 24 dicembre il Calendario dell’Avvento si attiva automaticamente.`;
+      }
+    }
+
+    function updateCountdown() {
+      if (currentView !== 'event') return;
+
+      const now = getEffectiveNow();
+      const ev = getSelectedEvent();
+      const target = getTargetDate(ev, now);
+
+      const displayYear = target.getFullYear();
+      activeEventTitle.textContent = ev.recurringAnnual ? `${ev.label} ${displayYear}` : ev.title;
+      activeEventDate.textContent = formatItalianDate(target);
+
+      updateAdventUI(now);
+
+      if (selectedEventId === 'natale' && now.getMonth() === 11 && now.getDate() === 25) {
+        return;
+      }
+
+      const diff = target.getTime() - now.getTime();
+      const isSameDay =
+        now.getFullYear() === target.getFullYear() &&
+        now.getMonth() === target.getMonth() &&
+        now.getDate() === target.getDate();
+
+      if (isSameDay) {
+        countdownGrid.classList.add('hidden');
+        eventReachedCard.classList.remove('hidden');
+        eventReachedText.textContent = `${ev.icon} Oggi è ${activeEventTitle.textContent}! Buona festa!`;
+      } else if (diff <= 0) {
+        countdownGrid.classList.add('hidden');
+        eventReachedCard.classList.remove('hidden');
+        eventReachedText.textContent = `${ev.icon} ${activeEventTitle.textContent} è già trascorso.`;
+      } else {
+        countdownGrid.classList.remove('hidden');
+        eventReachedCard.classList.add('hidden');
+
+        const totalSec = Math.floor(diff / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
+
+        cdDays.textContent = days >= 100 ? String(days) : pad(days);
+        cdHours.textContent = pad(hours);
+        cdMinutes.textContent = pad(minutes);
+
+        if (lastRenderedSecond !== seconds) {
+          cdSeconds.textContent = pad(seconds);
+          cdSeconds.classList.remove('tick-animate');
+          void cdSeconds.offsetWidth;
+          cdSeconds.classList.add('tick-animate');
+          lastRenderedSecond = seconds;
+        }
+      }
+    }
+
+    /*************************************************************************
+     * 9. PANNELLO ANTEPRIMA AVVENTO (1–25 DICEMBRE)
+     *************************************************************************/
+    function renderPreviewGrid() {
+      previewDaysGrid.innerHTML = '';
+      for (let d = 1; d <= 25; d++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.day = d;
+        const isXmas = d === 25;
+        btn.className = `preview-day-btn py-2 px-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+          isXmas
+            ? 'col-span-2 bg-amber-300/25 border-amber-200/70 text-amber-100 hover:bg-amber-300/40'
+            : 'bg-white/10 border-white/20 hover:bg-white/20 text-white'
+        }`;
+        btn.textContent = isXmas ? '✦ 25 Dicembre' : `${d} Dic`;
+
+        btn.addEventListener('click', () => {
+          simulatedDecemberDay = d;
+          highlightPreviewButtons();
+          setDoorState(false, false);
+          updateCountdown();
+          if (d <= 24) {
+            setTimeout(() => setDoorState(true, true), 300);
+          }
+        });
+        previewDaysGrid.appendChild(btn);
+      }
+    }
+
+    function highlightPreviewButtons() {
+      document.querySelectorAll('.preview-day-btn').forEach(btn => {
+        const d = Number(btn.dataset.day);
+        btn.classList.toggle('ring-2', simulatedDecemberDay === d);
+        btn.classList.toggle('ring-amber-200', simulatedDecemberDay === d);
+      });
+    }
+
+    togglePreviewPanelBtn.addEventListener('click', () => {
+      const hidden = adventPreviewPanel.classList.toggle('hidden');
+      togglePreviewPanelBtn.setAttribute('aria-expanded', String(!hidden));
+      previewArrow.style.transform = hidden ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    resetRealDateBtn.addEventListener('click', () => {
+      simulatedDecemberDay = null;
+      highlightPreviewButtons();
+      setDoorState(false, false);
+      updateCountdown();
+    });
+
+    /*************************************************************************
+     * 10. MOTORE ATMOSFERICO CANVAS HTML5 PER TUTTI E 7 I TEMI
+     *************************************************************************/
+    const canvas = document.getElementById('atmosphereCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    let canvasMode = 'christmas';
+    let christmasBoost = false;
+    let particles = [];
+    let fireworks = [];
+    let fwTick = 0;
+
+    function setChristmasBoost(boost) {
+      if (christmasBoost === boost) return;
+      christmasBoost = boost;
+      if (canvasMode === 'christmas') {
+        initAtmosphere('christmas');
+      }
+    }
+
+    function resizeAtmosphereCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initAtmosphere(canvasMode);
+    }
+
+    window.addEventListener('resize', () => {
+      if (currentView === 'event') {
+        resizeAtmosphereCanvas();
+        resizeBurstCanvas();
+      }
+    });
+
+    function setCanvasMode(mode) {
+      canvasMode = mode;
+      initAtmosphere(mode);
+    }
+
+    function initAtmosphere(mode) {
+      particles = [];
+      fireworks = [];
+      const baseCount = Math.min(140, Math.max(55, Math.floor(W / 12)));
+
+      if (mode === 'christmas') {
+        const count = christmasBoost ? Math.floor(baseCount * 1.8) : baseCount;
+        for (let i = 0; i < count; i++) {
+          const depth = Math.random();
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: 0.9 + depth * 3.8,
+            speedY: (0.45 + depth * 1.55) * (christmasBoost ? 1.32 : 1),
+            sway: Math.random() * Math.PI * 2,
+            swaySpeed: 0.008 + Math.random() * 0.018,
+            wind: (Math.random() - 0.35) * 0.35,
+            alpha: 0.25 + depth * 0.72,
+            isGold: Math.random() > 0.86
+          });
+        }
+      } else if (mode === 'newyear') {
+        for (let i = 0; i < 70; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H * 0.85,
+            r: Math.random() * 1.7 + 0.5,
+            alpha: Math.random() * 0.7 + 0.2,
+            twinkle: Math.random() * 0.025 + 0.008
+          });
+        }
+        launchFirework(false);
+      } else if (mode === 'easter') {
+        const colors = ['#fce7f3', '#fbcfe8', '#ffffff', '#fef3c7'];
+        for (let i = 0; i < Math.floor(baseCount * 0.78); i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            size: Math.random() * 6.5 + 4,
+            speedY: Math.random() * 0.9 + 0.35,
+            speedX: Math.random() * 0.7 - 0.15,
+            angle: Math.random() * Math.PI * 2,
+            spin: (Math.random() - 0.5) * 0.032,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: Math.random() * 0.58 + 0.3
+          });
+        }
+      } else if (mode === 'march') {
+        for (let i = 0; i < baseCount; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 2.2 + 0.8,
+            speedX: Math.random() * 0.55 + 0.2,
+            speedY: Math.random() * 0.5 + 0.15,
+            alpha: Math.random() * 0.6 + 0.18,
+            twinkle: Math.random() * 0.022 + 0.008
+          });
+        }
+      } else if (mode === 'may') {
+        for (let i = 0; i < baseCount; i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 3.2 + 1.1,
+            speedY: -(Math.random() * 0.45 + 0.14),
+            sway: Math.random() * Math.PI * 2,
+            alpha: Math.random() * 0.65 + 0.2,
+            pulse: Math.random() * 0.02 + 0.008
+          });
+        }
+      } else if (mode === 'summer') {
+        for (let i = 0; i < Math.floor(baseCount * 0.85); i++) {
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 4.5 + 1.5,
+            speedY: -(Math.random() * 0.48 + 0.16),
+            sway: Math.random() * Math.PI * 2,
+            alpha: Math.random() * 0.45 + 0.15,
+            isShimmer: Math.random() > 0.42
+          });
+        }
+      } else if (mode === 'ferragosto') {
+        // Lanterne calde e lucciole estive che salgono lentamente sul mare
+        for (let i = 0; i < Math.floor(baseCount * 0.72); i++) {
+          const isLantern = Math.random() > 0.72;
+          particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: isLantern ? (5 + Math.random() * 5) : (1.5 + Math.random() * 2.4),
+            speedY: -(isLantern ? (0.35 + Math.random() * 0.35) : (0.2 + Math.random() * 0.4)),
+            sway: Math.random() * Math.PI * 2,
+            swaySpeed: 0.01 + Math.random() * 0.015,
+            alpha: 0.4 + Math.random() * 0.55,
+            pulse: 0.012 + Math.random() * 0.016,
+            isLantern
+          });
+        }
+        launchFirework(true);
+      }
+    }
+
+    function launchFirework(warmOnly = false) {
+      const cx = W * (0.14 + Math.random() * 0.72);
+      const cy = H * (0.12 + Math.random() * 0.36);
+      const colors = warmOnly
+        ? ['#fde68a', '#fbbf24', '#fb923c', '#fff7ed']
+        : ['#fde68a', '#f59e0b', '#ffffff', '#93c5fd', '#fbcfe8'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const count = warmOnly ? 32 : 48;
+
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.14;
+        const speed = (warmOnly ? 1.1 : 1.5) + Math.random() * (warmOnly ? 2.6 : 3.6);
+        fireworks.push({
+          x: cx,
+          y: cy,
+          px: cx,
+          py: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: 1,
+          decay: 0.013 + Math.random() * 0.012,
+          color
+        });
+      }
+    }
+
+    function renderAtmosphere() {
+      if (currentView === 'event') {
+        ctx.clearRect(0, 0, W, H);
+
+        if (canvasMode === 'christmas') {
+          for (const p of particles) {
+            p.sway += p.swaySpeed;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.65 + p.wind;
+            if (p.y > H + 12) { p.y = -12; p.x = Math.random() * W; }
+            if (p.x > W + 12) p.x = -12;
+            if (p.x < -12) p.x = W + 12;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.isGold
+              ? `rgba(253, 230, 138, ${p.alpha})`
+              : `rgba(255, 252, 245, ${p.alpha})`;
+            ctx.fill();
+          }
+        } else if (canvasMode === 'newyear') {
+          for (const p of particles) {
+            p.alpha += p.twinkle;
+            if (p.alpha > 0.9 || p.alpha < 0.15) p.twinkle *= -1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(254, 243, 199, ${Math.max(0.1, p.alpha)})`;
+            ctx.fill();
+          }
+
+          fwTick++;
+          if (fwTick > 44) {
+            launchFirework(false);
+            fwTick = 0;
+          }
+
+          for (let i = fireworks.length - 1; i >= 0; i--) {
+            const f = fireworks[i];
+            f.px = f.x;
+            f.py = f.y;
+            f.x += f.vx;
+            f.y += f.vy;
+            f.vy += 0.038;
+            f.vx *= 0.985;
+            f.alpha -= f.decay;
+
+            if (f.alpha <= 0) {
+              fireworks.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = f.alpha;
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = 1.7;
+            ctx.beginPath();
+            ctx.moveTo(f.px, f.py);
+            ctx.lineTo(f.x, f.y);
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else if (canvasMode === 'easter') {
+          for (const p of particles) {
+            p.y += p.speedY;
+            p.x += p.speedX + Math.sin(p.angle) * 0.45;
+            p.angle += p.spin;
+            if (p.y > H + 16) { p.y = -16; p.x = Math.random() * W; }
+            if (p.x > W + 16) p.x = -16;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size, p.size * 0.48, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        } else if (canvasMode === 'march') {
+          for (const p of particles) {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.alpha += p.twinkle;
+            if (p.alpha > 0.8 || p.alpha < 0.15) p.twinkle *= -1;
+            if (p.x > W + 10) p.x = -10;
+            if (p.y > H + 10) p.y = -10;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(226, 232, 240, ${Math.max(0.1, p.alpha)})`;
+            ctx.fill();
+          }
+        } else if (canvasMode === 'may') {
+          const sun = ctx.createRadialGradient(W * 0.84, H * 0.14, 10, W * 0.84, H * 0.14, Math.max(W, H) * 0.45);
+          sun.addColorStop(0, 'rgba(254, 215, 130, 0.24)');
+          sun.addColorStop(1, 'rgba(254, 215, 130, 0)');
+          ctx.fillStyle = sun;
+          ctx.fillRect(0, 0, W, H);
+
+          for (const p of particles) {
+            p.sway += 0.015;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.45;
+            p.alpha += p.pulse;
+            if (p.alpha > 0.85 || p.alpha < 0.15) p.pulse *= -1;
+            if (p.y < -15) { p.y = H + 15; p.x = Math.random() * W; }
+
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2.4);
+            g.addColorStop(0, `rgba(254, 240, 138, ${Math.max(0.1, p.alpha)})`);
+            g.addColorStop(1, 'rgba(254, 240, 138, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 2.4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (canvasMode === 'summer') {
+          const sun = ctx.createRadialGradient(W * 0.86, H * 0.08, 12, W * 0.86, H * 0.08, Math.max(W, H) * 0.46);
+          sun.addColorStop(0, 'rgba(254, 249, 195, 0.34)');
+          sun.addColorStop(0.5, 'rgba(250, 204, 21, 0.09)');
+          sun.addColorStop(1, 'rgba(250, 204, 21, 0)');
+          ctx.fillStyle = sun;
+          ctx.fillRect(0, 0, W, H);
+
+          for (const p of particles) {
+            p.sway += 0.016;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.4;
+            if (p.y < -15) { p.y = H + 15; p.x = Math.random() * W; }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            if (p.isShimmer) {
+              ctx.fillStyle = `rgba(254, 249, 195, ${p.alpha + 0.18})`;
+              ctx.fill();
+            } else {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha + 0.12})`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        } else if (canvasMode === 'ferragosto') {
+          // Riflesso caldo dorato sull'acqua in basso
+          const seaGlow = ctx.createLinearGradient(0, H * 0.72, 0, H);
+          seaGlow.addColorStop(0, 'rgba(251, 146, 60, 0)');
+          seaGlow.addColorStop(1, 'rgba(251, 146, 60, 0.14)');
+          ctx.fillStyle = seaGlow;
+          ctx.fillRect(0, H * 0.72, W, H * 0.28);
+
+          // Lanterne calde e lucciole estive
+          for (const p of particles) {
+            p.sway += p.swaySpeed;
+            p.y += p.speedY;
+            p.x += Math.sin(p.sway) * 0.45;
+            p.alpha += p.pulse;
+            if (p.alpha > 0.92 || p.alpha < 0.28) p.pulse *= -1;
+            if (p.y < -25) { p.y = H + 20; p.x = Math.random() * W; }
+
+            const glowR = p.isLantern ? p.r * 3.2 : p.r * 2.2;
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
+            g.addColorStop(0, `rgba(255, 237, 179, ${Math.max(0.2, p.alpha)})`);
+            g.addColorStop(0.45, `rgba(251, 146, 60, ${Math.max(0.1, p.alpha * 0.55)})`);
+            g.addColorStop(1, 'rgba(251, 146, 60, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (p.isLantern) {
+              ctx.fillStyle = `rgba(255, 244, 214, ${Math.max(0.35, p.alpha)})`;
+              ctx.beginPath();
+              ctx.ellipse(p.x, p.y, p.r * 0.65, p.r * 0.9, 0, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Piccoli fuochi dorati d'agosto riflessi sul mare
+          fwTick++;
+          if (fwTick > 78) {
+            launchFirework(true);
+            fwTick = 0;
+          }
+
+          for (let i = fireworks.length - 1; i >= 0; i--) {
+            const f = fireworks[i];
+            f.px = f.x;
+            f.py = f.y;
+            f.x += f.vx;
+            f.y += f.vy;
+            f.vy += 0.032;
+            f.vx *= 0.986;
+            f.alpha -= f.decay;
+
+            if (f.alpha <= 0) {
+              fireworks.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = f.alpha * 0.85;
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(f.px, f.py);
+            ctx.lineTo(f.x, f.y);
+            ctx.stroke();
+
+            // Riflesso leggero nella parte inferiore (mare)
+            const mirrorY = H - (f.y * 0.26);
+            ctx.globalAlpha = f.alpha * 0.25;
+            ctx.fillStyle = f.color;
+            ctx.beginPath();
+            ctx.ellipse(f.x, mirrorY, 4, 1.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+      }
+
+      requestAnimationFrame(renderAtmosphere);
+    }
+
+    /*************************************************************************
+     * 11. AVVIO APPLICAZIONE
+     *************************************************************************/
+    window.addEventListener('load', () => {
+      renderHomeCards();
+      renderQuickEventNav();
+      renderPreviewGrid();
+      buildStageSnow();
+      setInterval(updateCountdown, 1000);
+      renderAtmosphere();
+    });
+  </script>
+</body>
+</html>
